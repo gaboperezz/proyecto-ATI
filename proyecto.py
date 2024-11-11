@@ -39,4 +39,6 @@ checkBox.pack(pady=12, padx=10)
 button2 = customtkinter.CTkButton(master=frame, text="Adjuntar archivo",command=openFile)
 button2.pack(pady=15, padx=12)
 
+print("la gabriela")
+
 root.mainloop()
