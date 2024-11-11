@@ -13,6 +13,7 @@ def login():
 
 def openFile():
     filepath = filedialog.askopenfilename()
+    print(filepath)
     archivo = open(filepath, 'rb')
     text = extract_text(archivo)
     print(text)
