@@ -19,7 +19,7 @@ usuario2 = Usuario("zgabo4", "lostussienvelez")
 
 usuarios = {usuario1, usuario2}
 
-
+ 
 def login():
     for u in usuarios:
         if(entry1.get() == u.nombre and entry2.get() == u.contrasena): 
