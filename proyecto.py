@@ -36,14 +36,28 @@ def openFile():
 
 
 def registrarse():
-    frame.pack_forget()
-    frameRegistro.pack(pady=20, padx=60, fill="both", expand=True)
+    mostrarFrameRegistro()
 
 def confirmarRegistro():
-    print("HOLA")
+    #NO HAY ISEMPTY (QUEEEE)#
+    if(entry1Registro.get() != "" and entry2Registro.get() != ""):
+        usuarioNuevo = Usuario(entry1Registro.get(), entry2Registro.get())
+        usuarios.add(usuarioNuevo)
+        print("Se registró correctamente")
+        mostrarFrameLogin()
+    else:
+        print("No se pudo registrar")
 
-
+def mostrarFrameRegistro():
+        frame.pack_forget()
+        frameRegistro.pack(pady=20, padx=60, fill="both", expand=True)
     
+def mostrarFrameLogin():
+    frameRegistro.pack_forget()
+    frame.pack(pady=20, padx=60, fill="both", expand=True)
+
+
+
 # FRAME LOGIN #
 frame = customtkinter.CTkFrame(master=root)
 frame.pack(pady=20, padx=60, fill="both", expand=True)
