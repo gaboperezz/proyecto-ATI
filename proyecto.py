@@ -1,4 +1,5 @@
 import customtkinter
+import re
 from tkinter import filedialog
 from pdfminer.high_level import extract_pages, extract_text
 
@@ -19,27 +20,42 @@ usuario2 = Usuario("zgabo4", "lostussienvelez")
 
 usuarios = {usuario1, usuario2}
 
- 
+usuarioLogueado = None
+
+palabrasClave = {} 
+
+
 def login():
     for u in usuarios:
         if(entry1.get() == u.nombre and entry2.get() == u.contrasena): 
             print("SI")
-            break
+            global usuarioLogueado
+            usuarioLogueado = u;
+            mostrarFramePrograma()
     else: print("NO")
 
 def openFile():
     filepath = filedialog.askopenfilename()
-    print(filepath)
     archivo = open(filepath, 'rb')
     text = extract_text(archivo)
     print(text)
 
+def agregarPalabrasClave():
+    filepath = filedialog.askopenfilename() 
+    with open(filepath, 'r', encoding='utf-8') as archivo:  # Abre el archivo en modo texto
+        texto = archivo.read() 
+        print(texto)
+        # Separar las frases por comas
+        palabras = re.split(r',\s*', texto)
+        for palabra in palabras:
+            palabrasClave[palabra] = 1
+        print(palabrasClave)
 
 def registrarse():
     mostrarFrameRegistro()
 
 def confirmarRegistro():
-    #NO HAY ISEMPTY (QUEEEE)#
+    #NO HAY isEMPTY (QUEEEE)#
     if(entry1Registro.get() != "" and entry2Registro.get() != ""):
         usuarioNuevo = Usuario(entry1Registro.get(), entry2Registro.get())
         usuarios.add(usuarioNuevo)
@@ -55,6 +71,22 @@ def mostrarFrameRegistro():
 def mostrarFrameLogin():
     frameRegistro.pack_forget()
     frame.pack(pady=20, padx=60, fill="both", expand=True)
+
+def mostrarFramePrograma():
+    frame.pack_forget()
+    framePrograma.pack(pady=40, padx=80, fill="both", expand=True)
+
+# LÓGICA PARA CERRAR SESIÓN #
+
+def logOut():
+    global usuarioLogueado
+    print(usuarioLogueado.nombre)
+    usuarioLogueado = None
+    entry1.delete(0, "end")
+    entry2.delete(0, "end")
+
+    framePrograma.pack_forget()
+    frame.pack(pady=40, padx=80, fill="both", expand=True)
 
 
 
@@ -80,8 +112,6 @@ button.pack(pady=12, padx=135)
 checkBox = customtkinter.CTkCheckBox(master=frame, text="Remember Me")
 checkBox.pack(pady=12, padx=10)
 
-button2 = customtkinter.CTkButton(master=frame, text="Adjuntar archivo",command=openFile)
-button2.pack(pady=15, padx=12)
 
 # FRAME REGISTRO #
 frameRegistro = customtkinter.CTkFrame(master=root)
@@ -98,5 +128,20 @@ entry2Registro.pack(pady=12, padx=10)
 buttonRegistro = customtkinter.CTkButton(master=frameRegistro, text="Confirmar", command=confirmarRegistro)
 buttonRegistro.pack(pady=12, padx=10)
 
+
+# FRAME PROGRAMA #
+framePrograma = customtkinter.CTkFrame(master=root)
+
+labelPrograma = customtkinter.CTkLabel(master=framePrograma, text="Lector PDF PAAAAAAAAA")
+labelPrograma.pack(pady=12, padx=10)
+
+buttonPrograma = customtkinter.CTkButton(master=framePrograma, text="Adjuntar archivo",command=openFile)
+buttonPrograma.pack(pady=15, padx=12)
+
+buttonPrograma2 = customtkinter.CTkButton(master=framePrograma, text="Agregar palabras clave",command=agregarPalabrasClave)
+buttonPrograma2.pack(pady=18, padx=20)
+
+buttonLogOut = customtkinter.CTkButton(master=framePrograma, text="Log Out", command=logOut)
+buttonLogOut.pack(pady=35, padx=130)
 
 root.mainloop()
