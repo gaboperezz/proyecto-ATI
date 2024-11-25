@@ -1,3 +1,8 @@
+
+
+#Importar libreria para manejo de la db#
+import pyodbc
+
 import customtkinter
 import re
 from tkinter import filedialog
@@ -7,7 +12,7 @@ customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
 
 root = customtkinter.CTk()
-root.geometry("500x350")
+root.geometry("600x450")
 
 #Datos para simular la base de datos#
 class Usuario:
@@ -40,6 +45,7 @@ def openFile():
     text = extract_text(archivo)
     print(text)
 
+# Registrar palabras clave#
 def agregarPalabrasClave():
     filepath = filedialog.askopenfilename() 
     with open(filepath, 'r', encoding='utf-8') as archivo:  # Abre el archivo en modo texto
@@ -48,8 +54,20 @@ def agregarPalabrasClave():
         # Separar las frases por comas
         palabras = re.split(r',\s*', texto)
         for palabra in palabras:
-            palabrasClave[palabra] = 1
+            # No sirve el código: palabrasClave[palabra] = 1 porque sobreescribe lo anterior
+            palabrasClave.setdefault(palabra, 1)
         print(palabrasClave)
+
+def eliminarPalabrasClave():
+    palabraABorrar = entryPrograma.get().strip()
+    if palabraABorrar in palabrasClave:
+        del palabrasClave[palabraABorrar]  # Elimina la palabra del diccionario
+        print(f"'{palabraABorrar}' fue eliminada del diccionario.")
+    else:
+        print(f"'{palabraABorrar}' no se encontró en el diccionario.\n Palabras clave:")
+        print(palabrasClave) 
+
+
 
 def registrarse():
     mostrarFrameRegistro()
@@ -141,7 +159,72 @@ buttonPrograma.pack(pady=15, padx=12)
 buttonPrograma2 = customtkinter.CTkButton(master=framePrograma, text="Agregar palabras clave",command=agregarPalabrasClave)
 buttonPrograma2.pack(pady=18, padx=20)
 
+# Grid para poner el botón y el entry en la misma fila
+frameEliminarPalabra = customtkinter.CTkFrame(master=framePrograma)  # Frame auxiliar para organizar en fila
+frameEliminarPalabra.pack(pady=18, padx=20)
+
+entryPrograma = customtkinter.CTkEntry(master=frameEliminarPalabra, placeholder_text="Palabra a eliminar")
+entryPrograma.grid(row=0, column=1, padx=5)  # Primera columna
+
+buttonPrograma3 = customtkinter.CTkButton(master=frameEliminarPalabra, text="Eliminar palabras clave", command=eliminarPalabrasClave)
+buttonPrograma3.grid(row=0, column=0, padx=5)  # Segunda columna
+
+#buttonPrograma3 = customtkinter.CTkButton(master=framePrograma, text="Eliminar palabras clave",command=eliminarPalabrasClave)
+#buttonPrograma3.pack(pady=18, padx=20)
+
+#entryPrograma = customtkinter.CTkEntry(master=framePrograma, placeholder_text="Palabra a eliminar")
+#entryPrograma.pack(pady=1, padx=10)#
+
 buttonLogOut = customtkinter.CTkButton(master=framePrograma, text="Log Out", command=logOut)
 buttonLogOut.pack(pady=35, padx=130)
 
+
+# CONEXION BD #
+server = 'localhost\SQLEXPRESS'
+#proyecto-303361-288901.database.windows.net#
+bd = 'AVERRR'
+#proyecto-303361-288901#
+user = 'gonza'
+#db_manager#
+contrasena = '123'
+#RV71ok9%"5Og#
+
+try:
+    conexion = pyodbc.connect('DRIVER={SQL Server}; SERVER=' + server + 
+                ';DATABASE=' + bd + ';UID=' + user + ';PWD=' + contrasena)
+
+    print("funcionaa :)")
+except pyodbc.Error as e:
+    print("Error de conexión:", e)
+
+# SELECCIONO DATOS DE LA BD (FUNCIONA, YUPIII)#
+cursor = conexion.cursor()
+cursor.execute("Select * from usuarios")
+
+usuarioBD = cursor.fetchone()
+
+while usuarioBD:
+    print(usuarioBD)
+    usuarioBD = cursor.fetchone()
+
+
+
+
+# LÓGICA ABM PALABRAS CLAVE #
+
+# El dictionary de palabras ya está hecho
+# La función de registrar palabras ya está hecho
+
+
+
+# CIERRO CURSOR Y CONEXION A DB #
+cursor.close()
+conexion.close()
+
+
+
 root.mainloop()
+
+
+
+
