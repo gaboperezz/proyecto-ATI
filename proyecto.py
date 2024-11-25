@@ -73,8 +73,7 @@ def registrarse():
     mostrarFrameRegistro()
 
 def confirmarRegistro():
-    #NO HAY isEMPTY (QUEEEE)#
-    if(entry1Registro.get() != "" and entry2Registro.get() != ""):
+    if(entry1Registro.get() != "" and entry2Registro.get() != "" and not entry1Registro.get().isspace() and not entry2Registro.get().isspace()):
         usuarioNuevo = Usuario(entry1Registro.get(), entry2Registro.get())
         usuarios.add(usuarioNuevo)
         print("Se registró correctamente")
