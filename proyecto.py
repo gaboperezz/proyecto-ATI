@@ -43,7 +43,8 @@ def openFile():
     filepath = filedialog.askopenfilename()
     archivo = open(filepath, 'rb')
     text = extract_text(archivo)
-    print(text)
+    #print(text)
+    encontrarPalabrasClaveEnTexto(text)
 
 # Registrar palabras clave#
 def agregarPalabrasClave():
@@ -67,6 +68,25 @@ def eliminarPalabrasClave():
         print(f"'{palabraABorrar}' no se encontró en el diccionario.\n Palabras clave:")
         print(palabrasClave) 
 
+def encontrarPalabrasClaveEnTexto(text):
+    for palabra in palabrasClave:
+        # Lo hago con expresión regular porque de otra forma tomaba palabras completas
+        # Ej: palabra clave = "aca" , si en el pdf una palabra era "acaridos" contaba como "aca"
+        # \b marca límites de palabra (aca es aca y no es acaridos), re.escape(palabra) indica caracteres especiales para que se traten como texto literal, 
+        pattern = rf'\b{re.escape(palabra)}\b' 
+        matches = re.findall(pattern, text, flags=re.IGNORECASE)  # Ignora mayúsculas/minúsculas
+        count = len(matches)
+        
+        if count > 0:
+            print(f"La palabra '{palabra}' fue encontrada {count} veces.")
+        #for palabra in palabrasClave:
+         #   count = text.lower().count(palabra.lower())  # Ignora mayúsculas/minúsculas
+          #  if count > 0:
+           #     print(f"La palabra '{palabra}' fue encontrada {count} veces.")
+
+ #  for palabra in palabrasClave:
+  #      if(palabra in text):
+   #         print("La palabra encontrada fue: " + palabra)
 
 
 def registrarse():
