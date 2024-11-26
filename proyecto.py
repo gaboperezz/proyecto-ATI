@@ -22,8 +22,9 @@ class Usuario:
     
 usuario1 = Usuario("chinac", "elchelo")
 usuario2 = Usuario("zgabo4", "lostussienvelez")
+usuario3 = Usuario("abc", "1234")
 
-usuarios = {usuario1, usuario2}
+usuarios = {usuario1, usuario2, usuario3}
 
 usuarioLogueado = None
 
@@ -33,11 +34,12 @@ palabrasClave = {}
 def login():
     for u in usuarios:
         if(entry1.get() == u.nombre and entry2.get() == u.contrasena): 
-            print("SI")
+            print("Ha iniciado sesión correctamente.")
             global usuarioLogueado
             usuarioLogueado = u;
             mostrarFramePrograma()
-    else: print("NO")
+            break
+    else: print("Error al iniciar sesión. Las credenciales no son correctas.")
 
 def openFile():
     filepath = filedialog.askopenfilename()
@@ -169,7 +171,7 @@ buttonRegistro.pack(pady=12, padx=10)
 # FRAME PROGRAMA #
 framePrograma = customtkinter.CTkFrame(master=root)
 
-labelPrograma = customtkinter.CTkLabel(master=framePrograma, text="Lector PDF PAAAAAAAAA")
+labelPrograma = customtkinter.CTkLabel(master=framePrograma, text="Lector PDF")
 labelPrograma.pack(pady=12, padx=10)
 
 buttonPrograma = customtkinter.CTkButton(master=framePrograma, text="Adjuntar archivo",command=openFile)
@@ -208,24 +210,26 @@ user = 'gonza'
 contrasena = '123'
 #RV71ok9%"5Og#
 
-try:
-    conexion = pyodbc.connect('DRIVER={SQL Server}; SERVER=' + server + 
-                ';DATABASE=' + bd + ';UID=' + user + ';PWD=' + contrasena)
 
-    print("funcionaa :)")
-except pyodbc.Error as e:
-    print("Error de conexión:", e)
+##LO COMENTE PARA PODER PROBAR
 
-# SELECCIONO DATOS DE LA BD (FUNCIONA, YUPIII)#
-cursor = conexion.cursor()
-cursor.execute("Select * from usuarios")
+# try:
+#     conexion = pyodbc.connect('DRIVER={SQL Server}; SERVER=' + server + 
+#                 ';DATABASE=' + bd + ';UID=' + user + ';PWD=' + contrasena)
 
-usuarioBD = cursor.fetchone()
+#     print("funcionaa :)")
+# except pyodbc.Error as e:
+#     print("Error de conexión:", e)
 
-while usuarioBD:
-    print(usuarioBD)
-    usuarioBD = cursor.fetchone()
+# # SELECCIONO DATOS DE LA BD (FUNCIONA, YUPIII)#
+# cursor = conexion.cursor()
+# cursor.execute("Select * from usuarios")
 
+# usuarioBD = cursor.fetchone()
+
+# while usuarioBD:
+#     print(usuarioBD)
+#     usuarioBD = cursor.fetchone()
 
 
 
@@ -237,8 +241,8 @@ while usuarioBD:
 
 
 # CIERRO CURSOR Y CONEXION A DB #
-cursor.close()
-conexion.close()
+# cursor.close()
+# conexion.close()
 
 
 
