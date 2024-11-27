@@ -21,8 +21,9 @@ class Usuario:
     
 usuario1 = Usuario("chinac", "elchelo")
 usuario2 = Usuario("zgabo4", "lostussienvelez")
+usuario3 = Usuario("abc","1234")
 
-usuarios = {usuario1, usuario2}
+usuarios = {usuario1, usuario2, usuario3}
 
 usuarioLogueado = None
 
@@ -32,11 +33,12 @@ palabrasClave = {}
 def login():
     for u in usuarios:
         if(entry1.get() == u.nombre and entry2.get() == u.contrasena): 
-            print("SI")
+            print("Ha iniciado sesión correctamente.")
             global usuarioLogueado
             usuarioLogueado = u;
             mostrarFramePrograma()
-    else: print("NO")
+            break
+    else: print("No se ha podido iniciar sesión. Credenciales incorrectas.")
 
 def openFile():
     filepath = filedialog.askopenfilename()
@@ -66,7 +68,7 @@ def eliminarPalabrasClave():
         print(f"'{palabraABorrar}' fue eliminada del diccionario.")
     else:
         print(f"'{palabraABorrar}' no se encontró en el diccionario.\n Palabras clave:")
-        print(palabrasClave) 
+        print(palabrasClave)
 
 #def encontrarPalabrasClaveEnTexto(text):
 
