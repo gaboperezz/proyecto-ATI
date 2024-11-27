@@ -1,5 +1,3 @@
-
-
 #Importar libreria para manejo de la db#
 import pyodbc
 
@@ -7,6 +5,7 @@ import customtkinter
 import re
 from tkinter import filedialog
 from pdfminer.high_level import extract_pages, extract_text
+from pdfminer.layout import LTTextContainer
 
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
@@ -22,9 +21,8 @@ class Usuario:
     
 usuario1 = Usuario("chinac", "elchelo")
 usuario2 = Usuario("zgabo4", "lostussienvelez")
-usuario3 = Usuario("abc", "1234")
 
-usuarios = {usuario1, usuario2, usuario3}
+usuarios = {usuario1, usuario2}
 
 usuarioLogueado = None
 
@@ -34,12 +32,11 @@ palabrasClave = {}
 def login():
     for u in usuarios:
         if(entry1.get() == u.nombre and entry2.get() == u.contrasena): 
-            print("Ha iniciado sesión correctamente.")
+            print("SI")
             global usuarioLogueado
             usuarioLogueado = u;
             mostrarFramePrograma()
-            break
-    else: print("Error al iniciar sesión. Las credenciales no son correctas.")
+    else: print("NO")
 
 def openFile():
     filepath = filedialog.askopenfilename()
@@ -47,6 +44,7 @@ def openFile():
     text = extract_text(archivo)
     #print(text)
     encontrarPalabrasClaveEnTexto(text)
+    contarParrafos(text)
 
 # Registrar palabras clave#
 def agregarPalabrasClave():
@@ -70,25 +68,70 @@ def eliminarPalabrasClave():
         print(f"'{palabraABorrar}' no se encontró en el diccionario.\n Palabras clave:")
         print(palabrasClave) 
 
-def encontrarPalabrasClaveEnTexto(text):
-    for palabra in palabrasClave:
+#def encontrarPalabrasClaveEnTexto(text):
+
+ #       parrafos = [p.strip() for p in re.split(r'\n\s*\n', text) if p.strip()]
+    
+  #      for palabra in palabrasClave:
+            # Expresión regular para buscar la palabra completa
+   #         pattern = rf'\b{re.escape(palabra)}\b'
+    #        encontrada = False
+
+     #       for i, parrafo in enumerate(parrafos, start=1):  # Enumerar los párrafos empezando desde 1
+      #          matches = re.findall(pattern, parrafo, flags=re.IGNORECASE)  # Ignora mayúsculas/minúsculas
+       #         count = len(matches)
+                
+        #        if count > 0:
+         #           if not encontrada:
+          #              print(f"La palabra '{palabra}' fue encontrada {count} veces en total:")
+           #             encontrada = True
+            #        print(f"  - En el párrafo {i}: {count} vez/veces.")
+
+   # for palabra in palabrasClave:
         # Lo hago con expresión regular porque de otra forma tomaba palabras completas
         # Ej: palabra clave = "aca" , si en el pdf una palabra era "acaridos" contaba como "aca"
         # \b marca límites de palabra (aca es aca y no es acaridos), re.escape(palabra) indica caracteres especiales para que se traten como texto literal, 
-        pattern = rf'\b{re.escape(palabra)}\b' 
-        matches = re.findall(pattern, text, flags=re.IGNORECASE)  # Ignora mayúsculas/minúsculas
-        count = len(matches)
+    #    pattern = rf'\b{re.escape(palabra)}\b' 
+     #   matches = re.findall(pattern, text, flags=re.IGNORECASE)  # Ignora mayúsculas/minúsculas
+      #  count = len(matches)
         
-        if count > 0:
-            print(f"La palabra '{palabra}' fue encontrada {count} veces.")
-        #for palabra in palabrasClave:
-         #   count = text.lower().count(palabra.lower())  # Ignora mayúsculas/minúsculas
-          #  if count > 0:
-           #     print(f"La palabra '{palabra}' fue encontrada {count} veces.")
+       # if count > 0:
+        #    print(f"La palabra '{palabra}' fue encontrada {count} veces."
 
- #  for palabra in palabrasClave:
-  #      if(palabra in text):
-   #         print("La palabra encontrada fue: " + palabra)
+#def contarParrafos(text):
+    # Usa una expresión regular para separar párrafos
+ #   parrafos = [p for p in re.split(r'\n\s*\n', text) if p.strip()]
+  #  print(f"El texto tiene {len(parrafos)} párrafos.")
+   # return parrafos
+
+def encontrarPalabrasClaveEnTextoPorPagina(filepath):
+    with open(filepath, 'rb') as archivo:
+        for page_number, page_layout in enumerate(extract_pages(archivo), start=1):
+            page_text = ""
+            for element in page_layout:
+                 if isinstance(element, LTTextContainer):  # Solo procesar elementos de texto
+                    page_text += element.get_text()
+
+        # Dividir en párrafos por página
+            parrafos = [p.strip() for p in page_text.split('\n') if p.strip()]
+
+            # Buscar palabras clave en los párrafos
+            for palabra in palabrasClave:
+                # Expresión regular para buscar la palabra completa
+                pattern = rf'\b{re.escape(palabra)}\b'
+                encontrada = False
+
+                for i, parrafo in enumerate(parrafos, start=1):
+                    matches = re.findall(pattern, parrafo, flags=re.IGNORECASE)
+                    count = len(matches)
+                   
+
+                    if count > 0:
+                        if not encontrada:
+                            print(f"EL PARRAFO NUMERO {i} DICE: " + parrafo)
+                            print(f"\nPalabra clave: '{palabra}' encontrada en la página {page_number}:")
+                            encontrada = True
+                        print(f"  - Párrafo {i} de la página {page_number}: {count} vez/veces.")
 
 
 def registrarse():
@@ -171,10 +214,10 @@ buttonRegistro.pack(pady=12, padx=10)
 # FRAME PROGRAMA #
 framePrograma = customtkinter.CTkFrame(master=root)
 
-labelPrograma = customtkinter.CTkLabel(master=framePrograma, text="Lector PDF")
+labelPrograma = customtkinter.CTkLabel(master=framePrograma, text="Lector PDF PAAAAAAAAA")
 labelPrograma.pack(pady=12, padx=10)
 
-buttonPrograma = customtkinter.CTkButton(master=framePrograma, text="Adjuntar archivo",command=openFile)
+buttonPrograma = customtkinter.CTkButton(master=framePrograma, text="Adjuntar archivo",command=lambda: encontrarPalabrasClaveEnTextoPorPagina(filedialog.askopenfilename()))
 buttonPrograma.pack(pady=15, padx=12)
 
 buttonPrograma2 = customtkinter.CTkButton(master=framePrograma, text="Agregar palabras clave",command=agregarPalabrasClave)
@@ -210,26 +253,24 @@ user = 'gonza'
 contrasena = '123'
 #RV71ok9%"5Og#
 
+try:
+    conexion = pyodbc.connect('DRIVER={SQL Server}; SERVER=' + server + 
+                ';DATABASE=' + bd + ';UID=' + user + ';PWD=' + contrasena)
 
-##LO COMENTE PARA PODER PROBAR
+    print("funcionaa :)")
+except pyodbc.Error as e:
+    print("Error de conexión:", e)
 
-# try:
-#     conexion = pyodbc.connect('DRIVER={SQL Server}; SERVER=' + server + 
-#                 ';DATABASE=' + bd + ';UID=' + user + ';PWD=' + contrasena)
+# SELECCIONO DATOS DE LA BD (FUNCIONA, YUPIII)#
+cursor = conexion.cursor()
+cursor.execute("Select * from usuarios")
 
-#     print("funcionaa :)")
-# except pyodbc.Error as e:
-#     print("Error de conexión:", e)
+usuarioBD = cursor.fetchone()
 
-# # SELECCIONO DATOS DE LA BD (FUNCIONA, YUPIII)#
-# cursor = conexion.cursor()
-# cursor.execute("Select * from usuarios")
+while usuarioBD:
+    print(usuarioBD)
+    usuarioBD = cursor.fetchone()
 
-# usuarioBD = cursor.fetchone()
-
-# while usuarioBD:
-#     print(usuarioBD)
-#     usuarioBD = cursor.fetchone()
 
 
 
@@ -241,8 +282,8 @@ contrasena = '123'
 
 
 # CIERRO CURSOR Y CONEXION A DB #
-# cursor.close()
-# conexion.close()
+cursor.close()
+conexion.close()
 
 
 
