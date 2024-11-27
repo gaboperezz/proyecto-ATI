@@ -274,23 +274,14 @@ while usuarioBD:
     usuarioBD = cursor.fetchone()
 
 
-
-
 # LÓGICA ABM PALABRAS CLAVE #
 
 # El dictionary de palabras ya está hecho
 # La función de registrar palabras ya está hecho
 
 
-
 # CIERRO CURSOR Y CONEXION A DB #
 cursor.close()
 conexion.close()
 
-
-
 root.mainloop()
-
-
-
-
