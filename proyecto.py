@@ -114,8 +114,31 @@ def encontrarPalabrasClaveEnTextoPorPagina(filepath):
                  if isinstance(element, LTTextContainer):  # Solo procesar elementos de texto
                     page_text += element.get_text()
 
-        # Dividir en párrafos por página
+
+            # Dividir en párrafos por página
             parrafos = [p.strip() for p in page_text.split('\n') if p.strip()]
+
+            parrafos_procesados = []
+            i = 0
+            while i < len(parrafos):
+                if parrafos[i].endswith('-') and i + 1 < len(parrafos):  # Si el párrafo termina con guión
+
+                    primeraPalabraSiguiente = devolverPrimeraPalabraParrafo(parrafos[i + 1]) 
+                    ultimaPalabraActual = devolverUltimaPalabraParrafo(parrafos[i])
+
+                    ultimaPalabraSinGuion = ultimaPalabraActual[:-1]
+                    ultimaPalabraSinGuion += primeraPalabraSiguiente
+                    
+                    # agregar la palabra al primer parrafo y sacarla del segundo
+                    parrafos[i] = parrafos[i][:-len(ultimaPalabraActual)] + ultimaPalabraSinGuion
+
+                    # Eliminar la primera palabra del siguiente párrafo
+                    parrafos[i + 1] = ' '.join(parrafos[i + 1].split()[1:])  # Quitar la primera palabra del siguiente párrafo
+
+                parrafos_procesados.append(parrafos[i])
+
+                i += 1
+
 
             # Buscar palabras clave en los párrafos
             for palabra in palabrasClave:
@@ -130,11 +153,22 @@ def encontrarPalabrasClaveEnTextoPorPagina(filepath):
 
                     if count > 0:
                         if not encontrada:
-                            print(f"EL PARRAFO NUMERO {i} DICE: " + parrafo)
-                            print(f"\nPalabra clave: '{palabra}' encontrada en la página {page_number}:")
+                            ##print(f"EL PARRAFO NUMERO {i} DICE: " + parrafo)
+                            print(f"\nPalabra clave: '{palabra}' encontrada en la página {page_number}, párrafo {i}")
+                            print(f"El parrafo dice:  {parrafo}")
                             encontrada = True
-                        print(f"  - Párrafo {i} de la página {page_number}: {count} vez/veces.")
 
+def devolverPrimeraPalabraParrafo(parrafo):
+
+    palabras = parrafo.split()
+
+    return palabras[0] if palabras else None
+
+def devolverUltimaPalabraParrafo(parrafo):
+
+    palabras = parrafo.split()
+
+    return palabras[-1] if palabras else None
 
 def registrarse():
     mostrarFrameRegistro()
