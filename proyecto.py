@@ -45,8 +45,8 @@ def openFile():
     archivo = open(filepath, 'rb')
     text = extract_text(archivo)
     #print(text)
-    encontrarPalabrasClaveEnTexto(text)
-    contarParrafos(text)
+    #encontrarPalabrasClaveEnTexto(text)
+    #contarParrafos(text)
 
 # Registrar palabras clave#
 def agregarPalabrasClave():
