@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador de palabras clave</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Buscador de palabras clave</h1>
+    </header>
+    <main>
+
+        <!-- SECCIONES -->
+     <div id="divLogin">
+        <!-- <form id="formLogin"> -->
+            <input type="text" id="txtLoginUsuario" placeholder="Usuario" required>
+            <input type="password" id="txtLoginPassword" placeholder="Contraseña" required>
+            <button type="button" id="btnLogin">Login</button>
+            <button type="button" id="btnIrARegistro">Registrarme</button>
+        <!-- </form> -->
+     </div>
+
+     <div id="divRegistrar" style="display: none;">
+        <input type="text" id="txtRegistroUsuario" placeholder="Usuario" required>
+        <input type="password" id="txtRegistroPassword" placeholder="Contraseña" required>
+        <button type="button" id="btnRegistro">Confirmar registro</button>
+        <button type="button" id="btnIrALogin">Volver a login</button>
+     </div>
+
+     <div id="divPalabrasClave" style="display: none;">
+        <button type="button">Adjuntar archivo PDF</button>
+        <button type="button">Agregar palabras clave</button>
+        <button type="button">Eliminar palabra clave</button>
+        <button type="button" id="btnLogout">Logout</button>
+     </div>
+
+
+
+        
+        <form id="task-form" style="display: none;">
+            <input type="text" id="task-input" placeholder="Escribe una tarea" required>
+            <button type="submit">Añadir Tarea</button>
+        </form>
+        <ul id="task-list"></ul>
+
+
+    </main>
+    <script src="app.js"></script>
+</body>
+</html>
