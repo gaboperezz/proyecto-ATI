@@ -1,6 +1,10 @@
 #Importar libreria para manejo de la db#
 import pyodbc
 
+from flask import request, jsonify
+from config import app, db
+from models import Contact #Poner las otras tablas despues
+
 import customtkinter
 import re
 from tkinter import filedialog
@@ -12,6 +16,75 @@ customtkinter.set_default_color_theme("dark-blue")
 
 root = customtkinter.CTk()
 root.geometry("600x450")
+
+# PARA QUE FUNCIONE LA APLICACION
+
+if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
+
+    app.run(debug=True)
+
+# RUTAS DE LA API
+
+@app.route("/usuarios", methods=["GET"])
+def get_algo():
+    users = Usuario.query.all()
+    json_users = list(map(lambda x: x.to_json(), users))
+    return jsonify({"usuarios": json_users}) #Aca manda codigo 200 por default
+
+@app.route("/crear_usuario", methods=["POST"])
+def crear_usuario():
+    user = request.json.get("user")
+    password = request.json.get("password") #VER COMO SERIA EL TEMA DE LA ENCRIPTACION
+
+    if not user or not password:
+        return (
+            jsonify({"message": "Las credenciales no pueden estar vacías."}),
+            400
+        )
+    
+    nuevo_usuario = Usuario(user=user, password=password)
+    try:
+        db.session.add(nuevo_usuario)
+        db.session.commit()
+    except Exception as e:
+        return (
+            jsonify({"message": str(e)}),
+            400
+        )
+
+    return jsonify({"message": "Usuario creado!"}), 201
+
+
+@app.route("/actualizar_usuario/<int:user_id>", methods=["PATCH"]) #capaz tenemos que cambiarlo por PUT
+def actualizar_usuario(user_id):
+    usuario = Usuario.query.get(user_id)
+
+    if not usuario:
+        return jsonify({"message": "Usuario no encontrado"}), 404
+    
+    data = request.json
+    usuario.user = data.get("user", usuario.user)
+    usuario.password = data.get("password", usuario.password)
+
+    db.session.commit()
+
+    return jsonify({"message": "Usuario actualizado"}), 201
+
+
+@app.route("/borrar_usuario/<int:user_id>", methods=["DELETE"])  
+def borrar_usuario(user_id):
+    usuario = Usuario.query.get(user_id) 
+    
+    if not usuario:
+        return jsonify({"message": "Usuario no encontrado"}), 404
+    
+    db.session.delete(usuario)
+    db.session.commit()
+
+    return jsonify({"message": "Usuario borrado"}), 200
+
 
 #Datos para simular la base de datos#
 class Usuario:
@@ -45,8 +118,6 @@ def openFile():
     archivo = open(filepath, 'rb')
     text = extract_text(archivo)
     #print(text)
-    #encontrarPalabrasClaveEnTexto(text)
-    #contarParrafos(text)
 
 # Registrar palabras clave#
 def agregarPalabrasClave():
@@ -70,41 +141,6 @@ def eliminarPalabrasClave():
         print(f"'{palabraABorrar}' no se encontró en el diccionario.\n Palabras clave:")
         print(palabrasClave)
 
-#def encontrarPalabrasClaveEnTexto(text):
-
- #       parrafos = [p.strip() for p in re.split(r'\n\s*\n', text) if p.strip()]
-    
-  #      for palabra in palabrasClave:
-            # Expresión regular para buscar la palabra completa
-   #         pattern = rf'\b{re.escape(palabra)}\b'
-    #        encontrada = False
-
-     #       for i, parrafo in enumerate(parrafos, start=1):  # Enumerar los párrafos empezando desde 1
-      #          matches = re.findall(pattern, parrafo, flags=re.IGNORECASE)  # Ignora mayúsculas/minúsculas
-       #         count = len(matches)
-                
-        #        if count > 0:
-         #           if not encontrada:
-          #              print(f"La palabra '{palabra}' fue encontrada {count} veces en total:")
-           #             encontrada = True
-            #        print(f"  - En el párrafo {i}: {count} vez/veces.")
-
-   # for palabra in palabrasClave:
-        # Lo hago con expresión regular porque de otra forma tomaba palabras completas
-        # Ej: palabra clave = "aca" , si en el pdf una palabra era "acaridos" contaba como "aca"
-        # \b marca límites de palabra (aca es aca y no es acaridos), re.escape(palabra) indica caracteres especiales para que se traten como texto literal, 
-    #    pattern = rf'\b{re.escape(palabra)}\b' 
-     #   matches = re.findall(pattern, text, flags=re.IGNORECASE)  # Ignora mayúsculas/minúsculas
-      #  count = len(matches)
-        
-       # if count > 0:
-        #    print(f"La palabra '{palabra}' fue encontrada {count} veces."
-
-#def contarParrafos(text):
-    # Usa una expresión regular para separar párrafos
- #   parrafos = [p for p in re.split(r'\n\s*\n', text) if p.strip()]
-  #  print(f"El texto tiene {len(parrafos)} párrafos.")
-   # return parrafos
 
 def encontrarPalabrasClaveEnTextoPorPagina(filepath):
     with open(filepath, 'rb') as archivo:
@@ -306,12 +342,6 @@ usuarioBD = cursor.fetchone()
 while usuarioBD:
     print(usuarioBD)
     usuarioBD = cursor.fetchone()
-
-
-# LÓGICA ABM PALABRAS CLAVE #
-
-# El dictionary de palabras ya está hecho
-# La función de registrar palabras ya está hecho
 
 
 # CIERRO CURSOR Y CONEXION A DB #
