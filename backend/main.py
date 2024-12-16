@@ -2,40 +2,40 @@
 import pyodbc
 
 from flask import request, jsonify
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from config import app, db
-from models import Contact #Poner las otras tablas despues
+from models import Usuario #Poner las otras tablas despues
 
-import customtkinter
 import re
 from tkinter import filedialog
 from pdfminer.high_level import extract_pages, extract_text
 from pdfminer.layout import LTTextContainer
 
-customtkinter.set_appearance_mode("dark")
-customtkinter.set_default_color_theme("dark-blue")
-
-root = customtkinter.CTk()
-root.geometry("600x450")
+#
+usuarioLogueado = None
+palabrasClave = {} 
+#
 
 # PARA QUE FUNCIONE LA APLICACION
 
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
+        jwt = JWTManager(app)
 
     app.run(debug=True)
 
 # RUTAS DE LA API
 
 @app.route("/usuarios", methods=["GET"])
-def get_algo():
+def get_usuarios():
     users = Usuario.query.all()
     json_users = list(map(lambda x: x.to_json(), users))
     return jsonify({"usuarios": json_users}) #Aca manda codigo 200 por default
 
 @app.route("/crear_usuario", methods=["POST"])
 def crear_usuario():
-    user = request.json.get("user")
+    user = request.json.get("username")
     password = request.json.get("password") #VER COMO SERIA EL TEMA DE LA ENCRIPTACION
 
     if not user or not password:
@@ -44,7 +44,12 @@ def crear_usuario():
             400
         )
     
-    nuevo_usuario = Usuario(user=user, password=password)
+    if Usuario.query.filter_by(username=user).first():
+        return jsonify({"error": "El usuario ya existe"}), 400
+    
+    hashed_password = Usuario.hash_password(password)
+    nuevo_usuario = Usuario(username=user, password=hashed_password)
+    
     try:
         db.session.add(nuevo_usuario)
         db.session.commit()
@@ -65,7 +70,7 @@ def actualizar_usuario(user_id):
         return jsonify({"message": "Usuario no encontrado"}), 404
     
     data = request.json
-    usuario.user = data.get("user", usuario.user)
+    usuario.user = data.get("username", usuario.user)
     usuario.password = data.get("password", usuario.password)
 
     db.session.commit()
@@ -86,32 +91,21 @@ def borrar_usuario(user_id):
     return jsonify({"message": "Usuario borrado"}), 200
 
 
-#Datos para simular la base de datos#
-class Usuario:
-    def __init__(self, nombre, contrasena):
-        self.nombre = nombre
-        self.contrasena = contrasena
-    
-usuario1 = Usuario("chinac", "elchelo")
-usuario2 = Usuario("zgabo4", "lostussienvelez")
-usuario3 = Usuario("abc","1234")
-
-usuarios = {usuario1, usuario2, usuario3}
-
-usuarioLogueado = None
-
-palabrasClave = {} 
-
-
+@app.route("/login", methods=["POST"])
 def login():
-    for u in usuarios:
-        if(entry1.get() == u.nombre and entry2.get() == u.contrasena): 
-            print("Ha iniciado sesión correctamente.")
-            global usuarioLogueado
-            usuarioLogueado = u;
-            mostrarFramePrograma()
-            break
-    else: print("No se ha podido iniciar sesión. Credenciales incorrectas.")
+
+    data = request.json
+    user = data.get("username")
+    password = data.get("password")
+
+    usuario = Usuario.query.filter_by(username=user).first()
+    
+    if not usuario or not usuario.check_password(password):
+        return jsonify({"message": "Las credenciales son incorrectas"}), 401
+
+    token = create_access_token(identity=user.id)
+    return jsonify({"token": token}), 200
+
 
 def openFile():
     filepath = filedialog.askopenfilename()
@@ -206,114 +200,6 @@ def devolverUltimaPalabraParrafo(parrafo):
 
     return palabras[-1] if palabras else None
 
-def registrarse():
-    mostrarFrameRegistro()
-
-def confirmarRegistro():
-    if(entry1Registro.get() != "" and entry2Registro.get() != "" and not entry1Registro.get().isspace() and not entry2Registro.get().isspace()):
-        usuarioNuevo = Usuario(entry1Registro.get(), entry2Registro.get())
-        usuarios.add(usuarioNuevo)
-        print("Se registró correctamente")
-        mostrarFrameLogin()
-    else:
-        print("No se pudo registrar")
-
-def mostrarFrameRegistro():
-        frame.pack_forget()
-        frameRegistro.pack(pady=20, padx=60, fill="both", expand=True)
-    
-def mostrarFrameLogin():
-    frameRegistro.pack_forget()
-    frame.pack(pady=20, padx=60, fill="both", expand=True)
-
-def mostrarFramePrograma():
-    frame.pack_forget()
-    framePrograma.pack(pady=40, padx=80, fill="both", expand=True)
-
-# LÓGICA PARA CERRAR SESIÓN #
-
-def logOut():
-    global usuarioLogueado
-    print(usuarioLogueado.nombre)
-    usuarioLogueado = None
-    entry1.delete(0, "end")
-    entry2.delete(0, "end")
-
-    framePrograma.pack_forget()
-    frame.pack(pady=40, padx=80, fill="both", expand=True)
-
-
-
-# FRAME LOGIN #
-frame = customtkinter.CTkFrame(master=root)
-frame.pack(pady=20, padx=60, fill="both", expand=True)
-
-label = customtkinter.CTkLabel(master=frame, text="Login")
-label.pack(pady=12, padx=10)
-
-entry1 = customtkinter.CTkEntry(master=frame, placeholder_text="Username")
-entry1.pack(pady=12, padx=10)
-
-entry2 = customtkinter.CTkEntry(master=frame, placeholder_text="Password", show="*")
-entry2.pack(pady=12, padx=10)
-
-button = customtkinter.CTkButton(master=frame, text="Login", command=login)
-button.pack(pady=12, padx=10)
-
-button = customtkinter.CTkButton(master=frame, text="No tengo cuenta", command=registrarse)
-button.pack(pady=12, padx=135)
-
-checkBox = customtkinter.CTkCheckBox(master=frame, text="Remember Me")
-checkBox.pack(pady=12, padx=10)
-
-
-# FRAME REGISTRO #
-frameRegistro = customtkinter.CTkFrame(master=root)
-
-labelRegistro = customtkinter.CTkLabel(master=frameRegistro, text="Registrarse")
-labelRegistro.pack(pady=12, padx=10)
-
-entry1Registro = customtkinter.CTkEntry(master=frameRegistro, placeholder_text="Username")
-entry1Registro.pack(pady=12, padx=10)
-
-entry2Registro = customtkinter.CTkEntry(master=frameRegistro, placeholder_text="Password", show="*")
-entry2Registro.pack(pady=12, padx=10)
-
-buttonRegistro = customtkinter.CTkButton(master=frameRegistro, text="Confirmar", command=confirmarRegistro)
-buttonRegistro.pack(pady=12, padx=10)
-
-
-# FRAME PROGRAMA #
-framePrograma = customtkinter.CTkFrame(master=root)
-
-labelPrograma = customtkinter.CTkLabel(master=framePrograma, text="Lector PDF PAAAAAAAAA")
-labelPrograma.pack(pady=12, padx=10)
-
-buttonPrograma = customtkinter.CTkButton(master=framePrograma, text="Adjuntar archivo",command=lambda: encontrarPalabrasClaveEnTextoPorPagina(filedialog.askopenfilename()))
-buttonPrograma.pack(pady=15, padx=12)
-
-buttonPrograma2 = customtkinter.CTkButton(master=framePrograma, text="Agregar palabras clave",command=agregarPalabrasClave)
-buttonPrograma2.pack(pady=18, padx=20)
-
-# Grid para poner el botón y el entry en la misma fila
-frameEliminarPalabra = customtkinter.CTkFrame(master=framePrograma)  # Frame auxiliar para organizar en fila
-frameEliminarPalabra.pack(pady=18, padx=20)
-
-entryPrograma = customtkinter.CTkEntry(master=frameEliminarPalabra, placeholder_text="Palabra a eliminar")
-entryPrograma.grid(row=0, column=1, padx=5)  # Primera columna
-
-buttonPrograma3 = customtkinter.CTkButton(master=frameEliminarPalabra, text="Eliminar palabras clave", command=eliminarPalabrasClave)
-buttonPrograma3.grid(row=0, column=0, padx=5)  # Segunda columna
-
-#buttonPrograma3 = customtkinter.CTkButton(master=framePrograma, text="Eliminar palabras clave",command=eliminarPalabrasClave)
-#buttonPrograma3.pack(pady=18, padx=20)
-
-#entryPrograma = customtkinter.CTkEntry(master=framePrograma, placeholder_text="Palabra a eliminar")
-#entryPrograma.pack(pady=1, padx=10)#
-
-buttonLogOut = customtkinter.CTkButton(master=framePrograma, text="Log Out", command=logOut)
-buttonLogOut.pack(pady=35, padx=130)
-
 
 # CONEXION BD #
 server = 'localhost\SQLEXPRESS'
@@ -333,19 +219,3 @@ try:
 except pyodbc.Error as e:
     print("Error de conexión:", e)
 
-# SELECCIONO DATOS DE LA BD (FUNCIONA, YUPIII)#
-cursor = conexion.cursor()
-cursor.execute("Select * from usuarios")
-
-usuarioBD = cursor.fetchone()
-
-while usuarioBD:
-    print(usuarioBD)
-    usuarioBD = cursor.fetchone()
-
-
-# CIERRO CURSOR Y CONEXION A DB #
-cursor.close()
-conexion.close()
-
-root.mainloop()
