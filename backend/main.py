@@ -18,6 +18,7 @@ usuarioLogueado = None
 palabrasClave = {} 
 #
 
+
 # PARA QUE FUNCIONE LA APLICACION
 
 if __name__ == "__main__":
@@ -28,7 +29,7 @@ if __name__ == "__main__":
     app.run(debug=True)
 
 
-# UPLOAD FILE DE CHATGPT
+# # UPLOAD FILE DE CHATGPT
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -241,21 +242,21 @@ def devolverUltimaPalabraParrafo(parrafo):
     return palabras[-1] if palabras else None
 
 
-# CONEXION BD #
-server = 'localhost\SQLEXPRESS'
-#proyecto-303361-288901.database.windows.net#
-bd = 'AVERRR'
-#proyecto-303361-288901#
-user = 'gonza'
-#db_manager#
-contrasena = '123'
-#RV71ok9%"5Og#
+# # CONEXION BD #
+# server = 'localhost\SQLEXPRESS'
+# #proyecto-303361-288901.database.windows.net#
+# bd = 'db_prueba'
+# #proyecto-303361-288901#
+# user = 'gabo'
+# #db_manager#
+# contrasena = '1357'
+# #RV71ok9%"5Og#
 
-try:
-    conexion = pyodbc.connect('DRIVER={SQL Server}; SERVER=' + server + 
-                ';DATABASE=' + bd + ';UID=' + user + ';PWD=' + contrasena)
+# try:
+#     conexion = pyodbc.connect('DRIVER={SQL Server}; SERVER=' + server + 
+#                 ';DATABASE=' + bd + ';UID=' + user + ';PWD=' + contrasena)
 
-    print("funcionaa :)")
-except pyodbc.Error as e:
-    print("Error de conexión:", e)
+#     print("funcionaa :)")
+# except pyodbc.Error as e:
+#     print("Error de conexión:", e)
 
