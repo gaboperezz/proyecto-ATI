@@ -4,7 +4,9 @@ import pyodbc
 from flask import request, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from config import app, db
-from models import Usuario #Poner las otras tablas despues
+from models import User, Document, Keyword, SearchResult, Search
+from datetime import datetime, timezone
+import os
 
 import re
 from tkinter import filedialog
@@ -25,11 +27,49 @@ if __name__ == "__main__":
 
     app.run(debug=True)
 
+
+# UPLOAD FILE DE CHATGPT
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    # Obtener el archivo y el ID del usuario desde la solicitud
+    file = request.files.get('document')
+    user_id = request.form.get('user_id')  # Asegúrate de que el formulario incluya este campo.
+
+    if not file or not user_id:
+        return jsonify({"error": "Archivo y usuario son obligatorios."}), 400
+
+    # Generar la ruta completa del archivo
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+
+    try:
+        # Guardar el archivo en el sistema de archivos
+        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)  # Crear el directorio si no existe
+        file.save(file_path)
+
+        # Guardar información en la base de datos
+        new_document = Document(
+            user_id=user_id,
+            filename=file.filename,
+            file_path=file_path,
+            uploaded_at=datetime.now(timezone.utc)
+        )
+        db.session.add(new_document)
+        db.session.commit()
+
+        return jsonify({"message": "Archivo subido con éxito.", "document_id": new_document.id}), 201
+
+    except Exception as e:
+        # Manejar errores y revertir la transacción en caso de fallo
+        db.session.rollback()
+        return jsonify({"error": "Error al subir el archivo.", "details": str(e)}), 500
+
+
 # RUTAS DE LA API
 
 @app.route("/usuarios", methods=["GET"])
 def get_usuarios():
-    users = Usuario.query.all()
+    users = User.query.all()
     json_users = list(map(lambda x: x.to_json(), users))
     return jsonify({"usuarios": json_users}) #Aca manda codigo 200 por default
 
@@ -44,11 +84,11 @@ def crear_usuario():
             400
         )
     
-    if Usuario.query.filter_by(username=user).first():
+    if User.query.filter_by(username=user).first():
         return jsonify({"error": "El usuario ya existe"}), 400
     
-    hashed_password = Usuario.hash_password(password)
-    nuevo_usuario = Usuario(username=user, password=hashed_password)
+    hashed_password = User.hash_password(password)
+    nuevo_usuario = User(username=user, password=hashed_password)
     
     try:
         db.session.add(nuevo_usuario)
@@ -64,7 +104,7 @@ def crear_usuario():
 
 @app.route("/actualizar_usuario/<int:user_id>", methods=["PATCH"]) #capaz tenemos que cambiarlo por PUT
 def actualizar_usuario(user_id):
-    usuario = Usuario.query.get(user_id)
+    usuario = User.query.get(user_id)
 
     if not usuario:
         return jsonify({"message": "Usuario no encontrado"}), 404
@@ -80,7 +120,7 @@ def actualizar_usuario(user_id):
 
 @app.route("/borrar_usuario/<int:user_id>", methods=["DELETE"])  
 def borrar_usuario(user_id):
-    usuario = Usuario.query.get(user_id) 
+    usuario = User.query.get(user_id) 
     
     if not usuario:
         return jsonify({"message": "Usuario no encontrado"}), 404
@@ -98,7 +138,7 @@ def login():
     user = data.get("username")
     password = data.get("password")
 
-    usuario = Usuario.query.filter_by(username=user).first()
+    usuario = User.query.filter_by(username=user).first()
     
     if not usuario or not usuario.check_password(password):
         return jsonify({"message": "Las credenciales son incorrectas"}), 401
