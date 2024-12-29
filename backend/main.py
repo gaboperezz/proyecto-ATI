@@ -19,17 +19,7 @@ palabrasClave = {}
 #
 
 
-# PARA QUE FUNCIONE LA APLICACION
-
-if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-        jwt = JWTManager(app)
-
-    app.run(debug=True)
-
-
-# # UPLOAD FILE DE CHATGPT
+# # UPLOAD FILE
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -68,6 +58,10 @@ def upload_file():
 
 # RUTAS DE LA API
 
+@app.route("/")
+def index():
+    return "<h1>Hola world<h1>"
+
 @app.route("/usuarios", methods=["GET"])
 def get_usuarios():
     users = User.query.all()
@@ -77,7 +71,7 @@ def get_usuarios():
 @app.route("/crear_usuario", methods=["POST"])
 def crear_usuario():
     user = request.json.get("username")
-    password = request.json.get("password") #VER COMO SERIA EL TEMA DE LA ENCRIPTACION
+    password = request.json.get("password")
 
     if not user or not password:
         return (
@@ -260,3 +254,11 @@ def devolverUltimaPalabraParrafo(parrafo):
 # except pyodbc.Error as e:
 #     print("Error de conexión:", e)
 
+# PARA QUE FUNCIONE LA APLICACION
+
+if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
+        jwt = JWTManager(app)
+
+    app.run(debug=True)

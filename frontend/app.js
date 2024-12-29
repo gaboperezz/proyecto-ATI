@@ -1,4 +1,4 @@
-const API_URL = ""; //PONER URL DE LA API
+const API_URL = "http://127.0.0.1:5000/"; //PONER URL DE LA API
 let token = null;
 
 /* IR A LOGIN O REGISTRO */

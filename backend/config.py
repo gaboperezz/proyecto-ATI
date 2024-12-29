@@ -11,12 +11,16 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = (
-    "mssql+pyodbc://gabo:1357@localhost/db_prueba?driver=ODBC+Driver+17+for+SQL+Server"
-    ) # #Aca va el link de la base de datos
+pwd = 'RV71ok9%"5Og'
+
+DATABASE_URI = "mssql+pyodbc://gabo:1357@localhost/db_prueba?driver=ODBC+Driver+17+for+SQL+Server"
+# "mssql+pyodbc://db_manager:"+pwd+"@proyecto-303361-288901.database.windows.net/proyecto-303361-288901?driver=ODBC+Driver+17+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no" PARA AZURE
+# "mssql+pyodbc://gabo:1357@localhost/db_prueba?driver=ODBC+Driver+17+for+SQL+Server" para pruebas locales
+
+app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
 
 # # CONEXION BD #
-# server = 'proyecto-303361-288901.database.windows.net'
+# server = 'proyecto-303361-288901.database.windows.net:1433?'
 # bd = 'proyecto-303361-288901'
 # user = 'db_manager'
 # contrasena = 'RV71ok9%"5Og'
