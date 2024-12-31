@@ -1,5 +1,4 @@
 const API_URL = "http://127.0.0.1:5000/"; //PONER URL DE LA API
-let token = null;
 
 /* IR A LOGIN O REGISTRO */
 
@@ -13,13 +12,13 @@ document.getElementById("btnIrALogin").addEventListener("click", () =>{
     document.getElementById("divLogin").style.display = "block";
 })
 
-/* METODOS PARA LOGIN Y REGISTRO */
+/* REGISTRO */
 
 document.getElementById("btnRegistro").addEventListener("click", async () => {
     const username = document.getElementById("txtRegistroUsuario").value;
     const password = document.getElementById("txtRegistroPassword").value;
 
-    const response = await fetch(`${API_URL}/registro`, {
+    const response = await fetch(`${API_URL}/crear_usuario`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -28,6 +27,8 @@ document.getElementById("btnRegistro").addEventListener("click", async () => {
     const resultado = await response.json();
     alert(resultado.message || resultado.error);
 });
+
+/* LOGIN Y LOGOUT */
 
 document.getElementById("btnLogin").addEventListener("click", async () => {
     const username = document.getElementById("txtLoginUsuario").value;
@@ -41,17 +42,72 @@ document.getElementById("btnLogin").addEventListener("click", async () => {
 
     if (response.ok) {
         const resultado = await response.json();
-        token = resultado.token;
+        // token = resultado.token;
+        localStorage.setItem("token", resultado.token);
+        localStorage.setItem("idLogueado", resultado.idUsuario);
         document.getElementById("divLogin").style.display = "none";
-        document.getElementById("task-form").style.display = "block";
-        fetchTasks();
+        document.getElementById("divMenuPrincipal").style.display = "block";
+        // document.getElementById("task-form").style.display = "block";
+        // fetchTasks();
     } else {
         alert("Credenciales inválidas.");
     }
 });
 
-/* METODOS PARA..... */ 
+document.getElementById("btnLogout").addEventListener("click", async () => {
 
+    localStorage.removeItem("token");
+    document.getElementById("divLogin").style.display = "block";
+    document.getElementById("divMenuPrincipal").style.display = "none";
+    document.getElementById("divRegistrar").style.display = "none";
+    alert("Sesion cerrada.")
+});
+
+
+
+/* PROTECTED DE EJEMPLO (pide autorizacion en el header) */ 
+
+document.getElementById("btnProtected").addEventListener("click", async () =>{
+    const response = await fetch(`${API_URL}/protected`, {
+        method: "GET",
+        headers: { 
+            "Authorization": `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json"
+        },
+    });
+
+    const resultado = await response.json();
+    alert(resultado.message || resultado.error);
+})
+
+/* ADJUNTAR ARCHIVO PDF */
+
+/* OBTENER PALABRAS CLAVE */
+document.getElementById("btnGetPalabrasClave").addEventListener("click", async () => {
+    const response = await fetch(`${API_URL}/getPalabrasClave/${localStorage.getItem("idLogueado")}`, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json"
+        },
+    });
+
+    const resultado = await response.json();
+    alert(resultado.message || resultado.error)
+    console.log(resultado)
+})
+
+/* AGREGAR PALABRAS CLAVE */
+
+/* ELIMINAR PALABRAS CLAVE */
+
+/* VER BUSQUEDAS ANTERIORES */
+
+/* REALIZAR BUSQUEDA */
+
+
+
+/* EJEMPLOS */
 
 document.getElementById("task-form").addEventListener("submit", async (e) => {
     e.preventDefault();

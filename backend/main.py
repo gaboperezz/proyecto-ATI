@@ -56,17 +56,38 @@ def upload_file():
         return jsonify({"error": "Error al subir el archivo.", "details": str(e)}), 500
 
 
-# RUTAS DE LA API
+# RUTAS DE INTERES #
 
 @app.route("/")
 def index():
-    return "<h1>Hola world<h1>"
+    return "<h1>Bienvenido<h1>"
 
-@app.route("/usuarios", methods=["GET"])
-def get_usuarios():
-    users = User.query.all()
-    json_users = list(map(lambda x: x.to_json(), users))
-    return jsonify({"usuarios": json_users}) #Aca manda codigo 200 por default
+@app.route("/protected", methods=["GET"])
+@jwt_required()
+def protected():
+    current_user = get_jwt_identity()
+    return jsonify({"message": f"Hola, {current_user}. Esta es una ruta protegida!"}), 200
+
+
+# LOGIN Y REGISTRO #
+
+@app.route("/login", methods=["POST"])
+def login():
+
+    data = request.json
+    user = data.get("username")
+    password = data.get("password")
+
+    usuario = User.query.filter_by(username=user).first()
+    
+    if not usuario or not usuario.check_password(password):
+        return jsonify({"message": "Las credenciales son incorrectas"}), 401
+
+    token = create_access_token(identity=str(usuario.id))
+    usuario_logueado = usuario.id
+
+    return jsonify({"token": token, "idUsuario":usuario_logueado}), 200
+
 
 @app.route("/crear_usuario", methods=["POST"])
 def crear_usuario():
@@ -95,6 +116,15 @@ def crear_usuario():
         )
 
     return jsonify({"message": "Usuario creado!"}), 201
+
+
+# GET, PATCH Y DELETE DE EJEMPLOS#
+
+@app.route("/usuarios", methods=["GET"])
+def get_usuarios():
+    users = User.query.all()
+    json_users = list(map(lambda x: x.to_json(), users))
+    return jsonify({"usuarios": json_users}) #Aca manda codigo 200 por default
 
 
 @app.route("/actualizar_usuario/<int:user_id>", methods=["PATCH"]) #capaz tenemos que cambiarlo por PUT
@@ -126,30 +156,65 @@ def borrar_usuario(user_id):
     return jsonify({"message": "Usuario borrado"}), 200
 
 
-@app.route("/login", methods=["POST"])
-def login():
 
-    data = request.json
-    user = data.get("username")
-    password = data.get("password")
-
-    usuario = User.query.filter_by(username=user).first()
-    
-    if not usuario or not usuario.check_password(password):
-        return jsonify({"message": "Las credenciales son incorrectas"}), 401
-
-    token = create_access_token(identity=user.id)
-    return jsonify({"token": token}), 200
-
-
+# ABRIR ARCHIVO #
 def openFile():
     filepath = filedialog.askopenfilename()
     archivo = open(filepath, 'rb')
     text = extract_text(archivo)
-    #print(text)
 
-# Registrar palabras clave#
+
+# GET PALABRAS CLAVE DE UN USUARIO PARA PROBAR
+@app.route("/getPalabrasClave/<int:user_id>", methods=["GET"])
+@jwt_required()
+def get_palabras_clave_usuario(user_id):
+    
+    try:
+        # Obtener las palabras clave asociadas al usuario
+        keywords = Keyword.query.filter_by(user_id=user_id).all()
+
+        # Si no se encuentran palabras clave
+        if not keywords:
+            return jsonify({"message": "No se encontraron palabras clave para este usuario."}), 404
+
+        # Retornar la lista de palabras clave
+        keyword_list = [keyword.word for keyword in keywords]
+        return jsonify({"user_id": user_id, "keywords": keyword_list}), 200
+
+    except Exception as e:
+        return jsonify({"error": "Error al obtener las palabras clave.", "details": str(e)}), 500
+
+
+# REGISTRO DE UNA PALABRA CLAVE PARA PROBAR
+@app.route("/crearPalabraClave", methods=["POST"])
+@jwt_required()
+def agregar_palabra_clave_usuario():
+    try:
+        user_id = get_jwt_identity()
+        data = request.get_json()
+        palabra = data.get('word')        
+        
+        if not palabra:
+            return jsonify({"error": "La palabra clave es obligatoria."}), 400
+        
+        # No ahy chequeo de palabras duplicadas
+        # Pienso que si le ponemos unique al atributo, puede joder a las palabras clave de otros usuarios
+        if Keyword.query.filter_by(keyword=palabra, user_id=user_id).first():
+            return jsonify({"error": "El usuario ya registró esta palabra clave"}), 400
+
+        nueva_keyword = Keyword(keyword=palabra, user_id=user_id)
+        db.session.add(nueva_keyword)
+        db.session.commit()
+
+        return jsonify({"message": "Palabra clave agregada con éxito.", "word": palabra}), 201
+    except Exception as e:
+        return jsonify({"error": "Error al agregar la palabra clave.", "details": str(e)}), 500
+
+
+# REGISTRAR PALABRAS CLAVE #
+# Se sube un archivo .txt que tiene todas las palabras deseadas separadas por coma
 def agregarPalabrasClave():
+    # La variable palabrasClave es un set global
     filepath = filedialog.askopenfilename() 
     with open(filepath, 'r', encoding='utf-8') as archivo:  # Abre el archivo en modo texto
         texto = archivo.read() 
@@ -161,6 +226,9 @@ def agregarPalabrasClave():
             palabrasClave.setdefault(palabra, 1)
         print(palabrasClave)
 
+
+# ELIMINAR PALABRAS CLAVE #
+# Recibe el id de una palabra para borrarla de la db
 def eliminarPalabrasClave():
     palabraABorrar = entryPrograma.get().strip()
     if palabraABorrar in palabrasClave:
@@ -171,6 +239,7 @@ def eliminarPalabrasClave():
         print(palabrasClave)
 
 
+# BUSQUEDA #
 def encontrarPalabrasClaveEnTextoPorPagina(filepath):
     with open(filepath, 'rb') as archivo:
         for page_number, page_layout in enumerate(extract_pages(archivo), start=1):
@@ -235,24 +304,6 @@ def devolverUltimaPalabraParrafo(parrafo):
 
     return palabras[-1] if palabras else None
 
-
-# # CONEXION BD #
-# server = 'localhost\SQLEXPRESS'
-# #proyecto-303361-288901.database.windows.net#
-# bd = 'db_prueba'
-# #proyecto-303361-288901#
-# user = 'gabo'
-# #db_manager#
-# contrasena = '1357'
-# #RV71ok9%"5Og#
-
-# try:
-#     conexion = pyodbc.connect('DRIVER={SQL Server}; SERVER=' + server + 
-#                 ';DATABASE=' + bd + ';UID=' + user + ';PWD=' + contrasena)
-
-#     print("funcionaa :)")
-# except pyodbc.Error as e:
-#     print("Error de conexión:", e)
 
 # PARA QUE FUNCIONE LA APLICACION
 

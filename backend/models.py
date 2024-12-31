@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 
 
 class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     # email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
@@ -47,7 +47,7 @@ class User(db.Model):
 
 
 class Document(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     filename = db.Column(db.String(255), nullable=False)
     file_path = db.Column(db.Text, nullable=False)
@@ -57,7 +57,7 @@ class Document(db.Model):
 
 
 class Keyword(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     keyword = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
@@ -66,7 +66,7 @@ class Keyword(db.Model):
 
 
 class Search(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     document_id = db.Column(db.Integer, db.ForeignKey('document.id'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
@@ -78,7 +78,7 @@ class Search(db.Model):
 
 
 class SearchResult(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     search_id = db.Column(db.Integer, db.ForeignKey('search.id'), nullable=False)
     keyword = db.Column(db.Text, nullable=False)
     occurrence_count = db.Column(db.Integer, default=0)
