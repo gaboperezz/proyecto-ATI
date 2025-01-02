@@ -1,5 +1,6 @@
-const API_URL = "http://127.0.0.1:5000/"; //PONER URL DE LA API
+const API_URL = "http://127.0.0.1:5000"; //PONER URL DE LA API
 
+cargarDocumentos();
 
 /* IR A LOGIN O REGISTRO */
 document.getElementById("btnIrARegistro").addEventListener("click", () =>{
@@ -98,7 +99,7 @@ document.getElementById("form-PDF").addEventListener("submit", async (event) => 
     formData.append("file", archivo);
 
     try {
-        const response = await fetch(`${API_URL}upload/pdf`, {
+        const response = await fetch(`${API_URL}/upload/pdf`, {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${localStorage.getItem("token")}`
@@ -173,7 +174,7 @@ document.getElementById("form-txt").addEventListener("submit", async (event) => 
     formData.append("file", archivo);
 
     try {
-        const response = await fetch(`${API_URL}upload/txt`, {
+        const response = await fetch(`${API_URL}/upload/txt`, {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${localStorage.getItem("token")}`
@@ -219,8 +220,98 @@ document.getElementById("btnEliminarPalabraClave").addEventListener("click", asy
 /* VER BUSQUEDAS ANTERIORES */
 // btnVerBusquedas
 
+// CARGAR DOCUMENTOS PARA BUSQUEDA
+// Cargar lista de documentos
+async function cargarDocumentos() {
+    const response = await fetch(`${API_URL}/user/documentos`, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("token")}`
+        }
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+        const listaDocumentos = document.getElementById("listaDocumentos");
+        data.documents.forEach(doc => {
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.value = doc.id;
+            checkbox.id = `doc-${doc.id}`;
+
+            const label = document.createElement("label");
+            label.htmlFor = `doc-${doc.id}`;
+            label.textContent = doc.name;
+
+            const br = document.createElement("br");
+            listaDocumentos.appendChild(checkbox);
+            listaDocumentos.appendChild(label);
+            listaDocumentos.appendChild(br);
+        });
+    } else {
+        alert("Error al cargar documentos: " + data.error);
+        alert(data.details)
+    }
+}
+
 /* REALIZAR BUSQUEDA */
 // btnRealizarBusqueda
+
+// REALIZA BUSQUEDA Y DEVUELVE PDF CON HIGHLIGHT
+document.getElementById("form-busqueda").addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const documentosSeleccionados = Array.from(document.querySelectorAll("#listaDocumentos input:checked"))
+    .map(checkbox => checkbox.value);
+
+    if (documentosSeleccionados.length === 0) {
+        alert("Por favor, selecciona al menos un archivo PDF.");
+        return;
+    }
+
+    const nombreBusqueda = document.getElementById("nombreBusqueda").value;
+
+    try {
+        const response = await fetch(`${API_URL}/busqueda`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                idsDocumentos: documentosSeleccionados,
+                nombreBusqueda: nombreBusqueda
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            alert(`Error: ${errorData.error}`);
+            alert(errorData.details)
+            return;
+        }
+
+        // Obtén el archivo PDF de la respuesta
+        const blob = await response.blob();
+
+        // Crea una URL temporal para el PDF
+        const pdfUrl = URL.createObjectURL(blob);
+
+        // Abre el PDF en una nueva pestaña
+        window.open(pdfUrl, "_blank");
+
+        // // Opcion para que se descargue
+        // const link = document.createElement("a");
+        // link.href = pdfUrl;
+        // link.download = "resultado_busqueda.pdf"; // Nombre del archivo descargado
+        // link.click();
+
+    } catch (error) {
+        console.error("Error al resaltar y mostrar el PDF:", error);
+        alert("Error al procesar el archivo.");
+    }
+    URL.revokeObjectURL(pdfUrl);
+})
 
 
 /* EJEMPLOS */

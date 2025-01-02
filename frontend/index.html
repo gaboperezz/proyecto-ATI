@@ -13,6 +13,7 @@
     <main>
 
         <!-- SECCIONES -->
+         <!-- LOGIN -->
      <div id="divLogin">
         <!-- <form id="formLogin"> -->
             <input type="text" id="txtLoginUsuario" placeholder="Usuario" required>
@@ -22,6 +23,7 @@
         <!-- </form> -->
      </div>
 
+     <!-- REGISTRO -->
      <div id="divRegistrar" style="display: none;">
         <input type="text" id="txtRegistroUsuario" placeholder="Usuario" required>
         <input type="password" id="txtRegistroPassword" placeholder="Contraseña" required>
@@ -29,6 +31,7 @@
         <button type="button" id="btnIrALogin">Volver a login</button>
      </div>
 
+     <!-- MENU PRINCIPAL -->
      <div id="divMenuPrincipal" style="display: none;">
         <!-- <button type="button">Adjuntar archivo PDF</button> -->
             <!-- Formulario para Subir un PDF -->
@@ -38,6 +41,7 @@
             <button type="submit">Subir PDF</button>
         </form>
 
+        <!-- AGREGAR PALABRAS CLAVE -->
         <button type="button" id="btnAgregarPalabraClave">Agregar palabra clave</button>
         <input type="text" id="txtPalabraClave" placeholder="Ingrese palabra clave">
 
@@ -50,11 +54,40 @@
             <button type="submit">Subir palabras clave</button>
         </form>
 
+        <!-- ELIMINAR PALABRA CLAVE -->
         <button type="button" id="btnEliminarPalabraClave">Eliminar palabra clave</button>
 
+        <!-- BUSQUEDAS -->
+         <!-- VER BUSQUEDAS -->
         <button type="button" id="btnVerBusquedas">Ver búsquedas anteriores</button>
 
-        <button type="button" id="btnRealizarBusqueda">Realizar búsqueda</button>
+        <!-- REALIZAR BUSQUEDA -->
+        <h1>BÚSQUEDA</h1>
+        <div id="listaDocumentos">
+            <h2>Selecciona documentos para la búsqueda</h2>
+            <!-- Aquí se cargará dinámicamente la lista de documentos -->
+        </div>
+
+        <form id="form-busqueda">
+            <label for="nombreBusqueda">Nombre de la Búsqueda:</label>
+            <input type="text" id="nombreBusqueda" placeholder="Nombre opcional">
+    
+            <button type="submit">Realizar Búsqueda</button>
+        </form>
+
+        <!-- <button type="button" id="btnRealizarBusqueda">Realizar búsqueda</button> -->
+
+        <h2>Actualizar Comentario de Búsqueda</h2>
+        <form id="updateCommentForm">
+            <label for="searchId">ID de la Búsqueda:</label>
+            <input type="number" id="searchId" placeholder="ID de la búsqueda" required>
+    
+            <label for="newComment">Nuevo Comentario:</label>
+            <textarea id="newComment" placeholder="Comentario"></textarea>
+    
+            <button type="submit">Actualizar Comentario</button>
+        </form>
+
 
         <button type="button" id="btnLogout">Logout</button>
 
@@ -74,5 +107,6 @@
 
     </main>
     <script src="app.js"></script>
+    
 </body>
 </html>

@@ -68,9 +68,9 @@ class Keyword(db.Model):
 class Search(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    document_id = db.Column(db.Integer, db.ForeignKey('document.id'), nullable=False)
+    # document_id = db.Column(db.Integer, db.ForeignKey('document.id'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
-    comment = db.Column(db.Text)
+    comment = db.Column(db.Text, nullable=True)
     search_date = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
     # Relación con SearchResult (1 Búsqueda -> N Resultados)
@@ -80,8 +80,8 @@ class Search(db.Model):
 class SearchResult(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     search_id = db.Column(db.Integer, db.ForeignKey('search.id'), nullable=False)
-    keyword = db.Column(db.Text, nullable=False)
-    occurrence_count = db.Column(db.Integer, default=0)
+    keyword = db.Column(db.String(255), nullable=False)
+    document_id = db.Column(db.Integer, db.ForeignKey("document.id"), nullable=False)  # Relación con Document
 
     # Relación inversa automática creada con backref (search)
 
