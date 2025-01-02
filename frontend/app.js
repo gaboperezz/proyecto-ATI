@@ -26,6 +26,8 @@ document.getElementById("btnRegistro").addEventListener("click", async () => {
 
     const resultado = await response.json();
     alert(resultado.message || resultado.error);
+
+    // Aca hay que validar errores cuando se trata de un usuario repetido
 });
 
 
@@ -47,6 +49,8 @@ document.getElementById("btnLogin").addEventListener("click", async () => {
         localStorage.setItem("idLogueado", resultado.idUsuario);
         document.getElementById("divLogin").style.display = "none";
         document.getElementById("divMenuPrincipal").style.display = "block";
+        document.getElementById("txtLoginUsuario").value = "";
+        document.getElementById("txtLoginPassword").value = "";
         // document.getElementById("task-form").style.display = "block";
         // fetchTasks();
     } else {
@@ -79,7 +83,42 @@ document.getElementById("btnProtected").addEventListener("click", async () =>{
 })
 
 
-/* ADJUNTAR ARCHIVO PDF */
+/* SUBIR ARCHIVO PDF */
+
+document.getElementById("form-PDF").addEventListener("submit", async (event) => {
+    event.preventDefault(); // Previene el envío del formulario por defecto
+
+    const archivo = document.getElementById("pdfFile").files[0];
+    if (!archivo) {
+        alert("Por favor, selecciona un archivo PDF.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", archivo);
+
+    try {
+        const response = await fetch(`${API_URL}upload/pdf`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("token")}`
+            },
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert(`PDF subido con éxito: ${result.filename}`);
+        } 
+        else {
+            alert(`Error: ${result.error}`);
+        }
+    } catch (error) {
+        console.error("Error al subir el archivo PDF:", error);
+        alert("Ocurrió un error al intentar subir el archivo.");
+    }
+});
 
 
 /* OBTENER PALABRAS CLAVE */
@@ -98,8 +137,8 @@ document.getElementById("btnGetPalabrasClave").addEventListener("click", async (
 })
 
 
-/* AGREGAR PALABRAS CLAVE */
-// btnAgregarPalabraClave
+/* AGREGAR PALABRA CLAVE */
+
 document.getElementById("btnAgregarPalabraClave").addEventListener("click", async () => {
     const word = document.getElementById("txtPalabraClave").value;
 
@@ -118,6 +157,42 @@ document.getElementById("btnAgregarPalabraClave").addEventListener("click", asyn
         alert(resultado.error || resultado.message);
     }
 })
+
+/* SUBIR ARCHIVO DE PALABRAS CLAVE */
+
+document.getElementById("form-txt").addEventListener("submit", async (event) => {
+    event.preventDefault(); // Previene el envío del formulario por defecto
+
+    const archivo = document.getElementById("txtFile").files[0];
+    if (!archivo) {
+        alert("Por favor, selecciona un archivo .txt.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", archivo);
+
+    try {
+        const response = await fetch(`${API_URL}upload/txt`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("token")}`
+            },
+            body: formData
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert(`Palabras clave subidas con éxito.`);
+            console.log(result.keywords.join(", "));
+        } else {
+            alert(`Error: ${result.error}`);
+        }
+    } catch (error) {
+        console.error("Error al subir el archivo .txt:", error);
+        alert("Ocurrió un error al intentar subir el archivo.");
+    }
+});
 
 
 /* ELIMINAR PALABRAS CLAVE */

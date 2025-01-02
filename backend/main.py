@@ -21,14 +21,24 @@ palabrasClave = {}
 
 # # UPLOAD FILE
 
-@app.route('/upload', methods=['POST'])
-def upload_file():
+@app.route('/upload/pdf', methods=['POST'])
+@jwt_required()
+def cargar_pdf():
     # Obtener el archivo y el ID del usuario desde la solicitud
     file = request.files.get('document')
-    user_id = request.form.get('user_id')  # Asegúrate de que el formulario incluya este campo.
+    user_id = get_jwt_identity()  # Asegúrate de que el formulario incluya este campo.
 
-    if not file or not user_id:
-        return jsonify({"error": "Archivo y usuario son obligatorios."}), 400
+    # Validar que se haya enviado un archivo
+    if 'file' not in request.files:
+        return jsonify({"error": "No se envió ningún archivo."}), 400
+    
+    file = request.files['file']
+
+    # Validar que el archivo tenga un nombre y sea un PDF
+    if file.filename == '':
+        return jsonify({"error": "El archivo no tiene nombre."}), 400
+    if not file.filename.endswith('.pdf'):
+        return jsonify({"error": "Solo se permiten archivos PDF."}), 400
 
     # Generar la ruta completa del archivo
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
@@ -48,12 +58,52 @@ def upload_file():
         db.session.add(new_document)
         db.session.commit()
 
-        return jsonify({"message": "Archivo subido con éxito.", "document_id": new_document.id}), 201
+        return jsonify({"message": "Archivo subido con éxito.", "idDocumento": new_document.id}), 201
 
     except Exception as e:
         # Manejar errores y revertir la transacción en caso de fallo
         db.session.rollback()
         return jsonify({"error": "Error al subir el archivo.", "details": str(e)}), 500
+
+
+@app.route("/upload/txt", methods=["POST"])
+@jwt_required()
+def cargar_txt_palabras_clave():
+    
+    try:
+        # Obtener el usuario autenticado
+        user_id = get_jwt_identity()
+
+        # Validar que se haya enviado un archivo
+        if 'file' not in request.files:
+            return jsonify({"error": "No se envió ningún archivo."}), 400
+
+        file = request.files['file']
+
+        # Validar que el archivo tenga un nombre y sea un archivo .txt
+        if file.filename == '':
+            return jsonify({"error": "El archivo no tiene nombre."}), 400
+        if not file.filename.endswith('.txt'):
+            return jsonify({"error": "Solo se permiten archivos .txt."}), 400
+        
+        # Leer el contenido del archivo
+        content = file.read().decode('utf-8')
+        keywords = [keyword.strip() for keyword in content.split(',') if keyword.strip()]
+
+        # Guardar palabras clave en la base de datos
+        for word in keywords:
+            new_keyword = Keyword(keyword=word, user_id=user_id)
+            db.session.add(new_keyword)
+        db.session.commit()
+
+        return jsonify({
+            "message": "Palabras clave cargadas exitosamente.",
+            "keywords": keywords
+        }), 201
+    
+    except Exception as e:
+        return jsonify({"error": "Error al cargar las palabras clave.", "details": str(e)}), 500
+
 
 
 # RUTAS DE INTERES #

@@ -30,12 +30,25 @@
      </div>
 
      <div id="divMenuPrincipal" style="display: none;">
-        <button type="button">Adjuntar archivo PDF</button>
+        <!-- <button type="button">Adjuntar archivo PDF</button> -->
+            <!-- Formulario para Subir un PDF -->
+        <form id="form-PDF">
+            <label for="pdfFile">Seleccione un archivo PDF:</label>
+            <input type="file" id="pdfFile" name="pdfFile" accept=".pdf" required>
+            <button type="submit">Subir PDF</button>
+        </form>
 
         <button type="button" id="btnAgregarPalabraClave">Agregar palabra clave</button>
         <input type="text" id="txtPalabraClave" placeholder="Ingrese palabra clave">
 
-        <button type="button">Subir archivo de palabras clave</button>
+        <!-- <button type="button">Subir archivo de palabras clave</button> -->
+        <!-- Formulario para Subir un Archivo .txt con Palabras Clave -->
+        <form id="form-txt">
+            <h2>Subir palabras clave (.txt)</h2>
+            <label for="txtFile">Seleccione un archivo .txt:</label>
+            <input type="file" id="txtFile" name="txtFile" accept=".txt" required>
+            <button type="submit">Subir palabras clave</button>
+        </form>
 
         <button type="button" id="btnEliminarPalabraClave">Eliminar palabra clave</button>
 
