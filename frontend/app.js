@@ -1,7 +1,7 @@
 const API_URL = "http://127.0.0.1:5000/"; //PONER URL DE LA API
 
-/* IR A LOGIN O REGISTRO */
 
+/* IR A LOGIN O REGISTRO */
 document.getElementById("btnIrARegistro").addEventListener("click", () =>{
     document.getElementById("divLogin").style.display = "none";
     document.getElementById("divRegistrar").style.display = "block";
@@ -12,8 +12,8 @@ document.getElementById("btnIrALogin").addEventListener("click", () =>{
     document.getElementById("divLogin").style.display = "block";
 })
 
-/* REGISTRO */
 
+/* REGISTRO */
 document.getElementById("btnRegistro").addEventListener("click", async () => {
     const username = document.getElementById("txtRegistroUsuario").value;
     const password = document.getElementById("txtRegistroPassword").value;
@@ -28,8 +28,8 @@ document.getElementById("btnRegistro").addEventListener("click", async () => {
     alert(resultado.message || resultado.error);
 });
 
-/* LOGIN Y LOGOUT */
 
+/* LOGIN Y LOGOUT */
 document.getElementById("btnLogin").addEventListener("click", async () => {
     const username = document.getElementById("txtLoginUsuario").value;
     const password = document.getElementById("txtLoginPassword").value;
@@ -64,9 +64,7 @@ document.getElementById("btnLogout").addEventListener("click", async () => {
 });
 
 
-
-/* PROTECTED DE EJEMPLO (pide autorizacion en el header) */ 
-
+/* PROTECTED DE EJEMPLO (pide autorizacion en el header) */
 document.getElementById("btnProtected").addEventListener("click", async () =>{
     const response = await fetch(`${API_URL}/protected`, {
         method: "GET",
@@ -80,7 +78,9 @@ document.getElementById("btnProtected").addEventListener("click", async () =>{
     alert(resultado.message || resultado.error);
 })
 
+
 /* ADJUNTAR ARCHIVO PDF */
+
 
 /* OBTENER PALABRAS CLAVE */
 document.getElementById("btnGetPalabrasClave").addEventListener("click", async () => {
@@ -97,14 +97,55 @@ document.getElementById("btnGetPalabrasClave").addEventListener("click", async (
     console.log(resultado)
 })
 
+
 /* AGREGAR PALABRAS CLAVE */
+// btnAgregarPalabraClave
+document.getElementById("btnAgregarPalabraClave").addEventListener("click", async () => {
+    const word = document.getElementById("txtPalabraClave").value;
+
+    const response = await fetch(`${API_URL}/crearPalabraClave`, {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ word })
+    });
+
+    if (response.ok) {
+        alert(resultado.message)
+    } else{
+        alert(resultado.error || resultado.message);
+    }
+})
+
 
 /* ELIMINAR PALABRAS CLAVE */
+// btnEliminarPalabraClave
+// Va a haber un listado de las palabras en el front end? Ahi viene el id y elimino una?
+document.getElementById("btnEliminarPalabraClave").addEventListener("click", async (idPalabraClave) => {
+
+    const response = await fetch(`${API_URL}/eliminarPalabraClave/${idPalabraClave}`, {
+        method: "DELETE",
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json"
+        }
+    });
+
+    if (response.ok) {
+        alert(resultado.message)
+    } else{
+        alert(resultado.error || resultado.message);
+    }
+})
+
 
 /* VER BUSQUEDAS ANTERIORES */
+// btnVerBusquedas
 
 /* REALIZAR BUSQUEDA */
-
+// btnRealizarBusqueda
 
 
 /* EJEMPLOS */

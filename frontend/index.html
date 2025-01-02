@@ -31,12 +31,22 @@
 
      <div id="divMenuPrincipal" style="display: none;">
         <button type="button">Adjuntar archivo PDF</button>
-        <button type="button">Agregar palabras clave</button>
-        <button type="button">Eliminar palabra clave</button>
-        <button type="button">Ver búsquedas anteriores</button>
-        <button type="button">Realizar búsqueda</button>
+
+        <button type="button" id="btnAgregarPalabraClave">Agregar palabra clave</button>
+        <input type="text" id="txtPalabraClave" placeholder="Ingrese palabra clave">
+
+        <button type="button">Subir archivo de palabras clave</button>
+
+        <button type="button" id="btnEliminarPalabraClave">Eliminar palabra clave</button>
+
+        <button type="button" id="btnVerBusquedas">Ver búsquedas anteriores</button>
+
+        <button type="button" id="btnRealizarBusqueda">Realizar búsqueda</button>
+
         <button type="button" id="btnLogout">Logout</button>
+
         <button type="button" id="btnProtected">PROTECTED</button>
+
         <button type="button" id="btnGetPalabrasClave">Ver palabras clave</button>
      </div>
 

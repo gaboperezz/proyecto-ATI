@@ -178,7 +178,7 @@ def get_palabras_clave_usuario(user_id):
             return jsonify({"message": "No se encontraron palabras clave para este usuario."}), 404
 
         # Retornar la lista de palabras clave
-        keyword_list = [keyword.word for keyword in keywords]
+        keyword_list = [keyword.keyword for keyword in keywords]
         return jsonify({"user_id": user_id, "keywords": keyword_list}), 200
 
     except Exception as e:
@@ -192,12 +192,15 @@ def agregar_palabra_clave_usuario():
     try:
         user_id = get_jwt_identity()
         data = request.get_json()
-        palabra = data.get('word')        
+        palabra = data.get('word')
+        
+        # ??
+        palabra.strip()
         
         if not palabra:
             return jsonify({"error": "La palabra clave es obligatoria."}), 400
         
-        # No ahy chequeo de palabras duplicadas
+        # No hay chequeo de palabras duplicadas
         # Pienso que si le ponemos unique al atributo, puede joder a las palabras clave de otros usuarios
         if Keyword.query.filter_by(keyword=palabra, user_id=user_id).first():
             return jsonify({"error": "El usuario ya registró esta palabra clave"}), 400
@@ -229,14 +232,20 @@ def agregarPalabrasClave():
 
 # ELIMINAR PALABRAS CLAVE #
 # Recibe el id de una palabra para borrarla de la db
-def eliminarPalabrasClave():
-    palabraABorrar = entryPrograma.get().strip()
-    if palabraABorrar in palabrasClave:
-        del palabrasClave[palabraABorrar]  # Elimina la palabra del diccionario
-        print(f"'{palabraABorrar}' fue eliminada del diccionario.")
-    else:
-        print(f"'{palabraABorrar}' no se encontró en el diccionario.\n Palabras clave:")
-        print(palabrasClave)
+@app.route("/eliminarPalabraClave/<int:keyword_id>", methods=["DELETE"])
+@jwt_required()
+def eliminarPalabrasClave(keyword_id):
+
+    palabraABorrar = Keyword.query.get(keyword_id)
+
+    if not palabraABorrar:
+        return jsonify({"message": "Palabra clave no encontrada"}), 404
+    
+    db.session.delete(palabraABorrar)
+    db.session.commit()
+
+    return jsonify({"message": "Palabra clave borrada"}), 200
+
 
 
 # BUSQUEDA #
@@ -291,6 +300,7 @@ def encontrarPalabrasClaveEnTextoPorPagina(filepath):
                             print(f"\nPalabra clave: '{palabra}' encontrada en la página {page_number}, párrafo {i}")
                             print(f"El parrafo dice:  {parrafo}")
                             encontrada = True
+
 
 def devolverPrimeraPalabraParrafo(parrafo):
 
