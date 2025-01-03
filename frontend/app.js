@@ -1,6 +1,5 @@
 const API_URL = "http://127.0.0.1:5000"; //PONER URL DE LA API
 
-cargarDocumentos();
 
 /* IR A LOGIN O REGISTRO */
 document.getElementById("btnIrARegistro").addEventListener("click", () =>{
@@ -48,6 +47,8 @@ document.getElementById("btnLogin").addEventListener("click", async () => {
         // token = resultado.token;
         localStorage.setItem("token", resultado.token);
         localStorage.setItem("idLogueado", resultado.idUsuario);
+        cargarDocumentos();
+        cargarPalabrasClave();
         document.getElementById("divLogin").style.display = "none";
         document.getElementById("divMenuPrincipal").style.display = "block";
         document.getElementById("txtLoginUsuario").value = "";
@@ -122,22 +123,6 @@ document.getElementById("form-PDF").addEventListener("submit", async (event) => 
 });
 
 
-/* OBTENER PALABRAS CLAVE */
-document.getElementById("btnGetPalabrasClave").addEventListener("click", async () => {
-    const response = await fetch(`${API_URL}/getPalabrasClave/${localStorage.getItem("idLogueado")}`, {
-        method: "GET",
-        headers: {
-            "Authorization": `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json"
-        },
-    });
-
-    const resultado = await response.json();
-    alert(resultado.message || resultado.error)
-    console.log(resultado)
-})
-
-
 /* AGREGAR PALABRA CLAVE */
 
 document.getElementById("btnAgregarPalabraClave").addEventListener("click", async () => {
@@ -196,11 +181,42 @@ document.getElementById("form-txt").addEventListener("submit", async (event) => 
 });
 
 
-/* ELIMINAR PALABRAS CLAVE */
-// btnEliminarPalabraClave
-// Va a haber un listado de las palabras en el front end? Ahi viene el id y elimino una?
-document.getElementById("btnEliminarPalabraClave").addEventListener("click", async (idPalabraClave) => {
+// CARGAR LISTA DE PALABRAS CLAVE
+async function cargarPalabrasClave() {
+    const response = await fetch(`${API_URL}/getPalabrasClave`, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("token")}`
+        }
+    });
 
+    const data = await response.json();
+    if (response.ok) {
+        const listaPalabrasClave = document.getElementById("listaPalabrasClave");
+        listaPalabrasClave.innerHTML = "";
+        i=0;
+        data.keywords.forEach(kw => {
+            const li = document.createElement("li");
+            li.textContent = kw;
+            const deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "Eliminar";
+            // deleteBtn.addEventListener("click", () => eliminarPalabraClave(data.keywordsIds[i]));
+            deleteBtn.addEventListener("click", ((id) => () => eliminarPalabraClave(id))(data.keywordsIds[i]));
+            console.log(data.keywordsIds[i])
+            li.appendChild(deleteBtn);
+            listaPalabrasClave.appendChild(li);
+            i++;
+        });
+    } else {
+        alert("Error al cargar documentos: " + data.error);
+        alert(data.details)
+    }
+}
+
+
+/* ELIMINAR PALABRAS CLAVE */
+
+async function eliminarPalabraClave(idPalabraClave){
     const response = await fetch(`${API_URL}/eliminarPalabraClave/${idPalabraClave}`, {
         method: "DELETE",
         headers: {
@@ -209,13 +225,14 @@ document.getElementById("btnEliminarPalabraClave").addEventListener("click", asy
         }
     });
 
+    const resultado = await response.json();
     if (response.ok) {
         alert(resultado.message)
     } else{
         alert(resultado.error || resultado.message);
     }
-})
-
+    cargarPalabrasClave();
+}
 
 /* VER BUSQUEDAS ANTERIORES */
 // btnVerBusquedas
@@ -315,25 +332,6 @@ document.getElementById("form-busqueda").addEventListener("submit", async (event
 
 
 /* EJEMPLOS */
-
-document.getElementById("task-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const content = document.getElementById("task-input").value;
-
-    const response = await fetch(`${API_URL}/tasks`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ content }),
-    });
-
-    if (response.ok) {
-        fetchTasks();
-        document.getElementById("task-input").value = "";
-    }
-});
 
 async function fetchTasks() {
     const response = await fetch(`${API_URL}/tasks`, {

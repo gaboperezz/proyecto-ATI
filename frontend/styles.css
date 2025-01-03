@@ -17,16 +17,16 @@ main {
 }
 
 form {
-    display: flex;
+    /* display: flex; */
     gap: 10px;
 }
 
-#task-list {
+#listaPalabrasClave {
     list-style: none;
     padding: 0;
 }
 
-#task-list li {
+#listaPalabrasClave li {
     display: flex;
     justify-content: space-between;
     background: #fff;

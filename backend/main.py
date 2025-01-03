@@ -79,10 +79,10 @@ def crear_usuario():
 
 
 # GET PALABRAS CLAVE DE UN USUARIO #
-@app.route("/getPalabrasClave/<int:user_id>", methods=["GET"])
+@app.route("/getPalabrasClave", methods=["GET"])
 @jwt_required()
-def get_palabras_clave_usuario(user_id):
-    
+def get_palabras_clave_usuario():
+    user_id = get_jwt_identity()
     try:
         # Obtener las palabras clave asociadas al usuario
         keywords = Keyword.query.filter_by(user_id=user_id).all()
@@ -93,7 +93,8 @@ def get_palabras_clave_usuario(user_id):
 
         # Retornar la lista de palabras clave
         keyword_list = [keyword.keyword for keyword in keywords]
-        return jsonify({"user_id": user_id, "keywords": keyword_list}), 200
+        keyword_id_list = [keyword.id for keyword in keywords]
+        return jsonify({"user_id": user_id, "keywords": keyword_list, "keywordsIds": keyword_id_list}), 200
 
     except Exception as e:
         return jsonify({"error": "Error al obtener las palabras clave.", "details": str(e)}), 500
@@ -245,8 +246,10 @@ def get_documentos_usuario():
         return jsonify({"error": "Error al obtener documentos del usuario.", "details": str(e)}), 500
 
 
+# OBTENER BUSQUEDAS REALIZADAS
 
-# BUSQUEDA NUEVA #
+
+# REALIZAR BUSQUEDA #
 @app.route("/busqueda", methods=["POST"])
 @jwt_required()
 def realizar_busqueda():
@@ -286,10 +289,6 @@ def realizar_busqueda():
 
         # Buscar palabras clave
         for document in documents:
-            
-            # # Leer el texto del documento
-            # with open(document.path, "r", encoding="utf-8") as file:
-            #     text = file.read()
 
             doc = fitz.open(document.file_path)
 
@@ -324,9 +323,6 @@ def realizar_busqueda():
             download_name=f"{document.filename}_highlighted.pdf",
             mimetype="application/pdf"
         )
-
-        return jsonify({"message": "Se realizó correctamente la búsqueda",
-                        "nombreBusqueda": nombre_busqueda}), 201
     
     except SQLAlchemyError as e:
         db.session.rollback()
@@ -335,78 +331,36 @@ def realizar_busqueda():
         return jsonify({"error": "Error al procesar el PDF", "details": str(e)}), 500
 
 
+# AGREGAR COMENTARIO A LA BUSQUEDA #
+@app.route("/busqueda/<int:search_id>/comentario", methods=["PUT"])
+@jwt_required()
+def agregar_comentario_busqueda(search_id):
+    try:
+        # Obtener ID del usuario autenticado
+        user_id = get_jwt_identity()
+        data = request.json
+        comentario = data.get("comentario")
 
+        # Validación
+        if not comentario:
+            return jsonify({"error": "El comentario no puede estar vacío."}), 400
 
+        # Verificar si la búsqueda pertenece al usuario
+        search = Search.query.filter_by(id=search_id, user_id=user_id).first()
+        if not search:
+            return jsonify({"error": "Búsqueda no encontrada o no pertenece al usuario."}), 404
 
+        # Actualizar el comentario de la búsqueda
+        search.comment = comentario
+        db.session.commit()
 
+        return jsonify({"message": "Comentario agregado con éxito."}), 200
 
-
-
-# BUSQUEDA VIEJA #
-def encontrarPalabrasClaveEnTextoPorPagina(filepath):
-    with open(filepath, 'rb') as archivo:
-        for page_number, page_layout in enumerate(extract_pages(archivo), start=1):
-            page_text = ""
-            for element in page_layout:
-                 if isinstance(element, LTTextContainer):  # Solo procesar elementos de texto
-                    page_text += element.get_text()
-
-
-            # Dividir en párrafos por página
-            parrafos = [p.strip() for p in page_text.split('\n') if p.strip()]
-
-            parrafos_procesados = []
-            i = 0
-            while i < len(parrafos):
-                if parrafos[i].endswith('-') and i + 1 < len(parrafos):  # Si el párrafo termina con guión
-
-                    primeraPalabraSiguiente = devolverPrimeraPalabraParrafo(parrafos[i + 1]) 
-                    ultimaPalabraActual = devolverUltimaPalabraParrafo(parrafos[i])
-
-                    ultimaPalabraSinGuion = ultimaPalabraActual[:-1]
-                    ultimaPalabraSinGuion += primeraPalabraSiguiente
-                    
-                    # agregar la palabra al primer parrafo y sacarla del segundo
-                    parrafos[i] = parrafos[i][:-len(ultimaPalabraActual)] + ultimaPalabraSinGuion
-
-                    # Eliminar la primera palabra del siguiente párrafo
-                    parrafos[i + 1] = ' '.join(parrafos[i + 1].split()[1:])  # Quitar la primera palabra del siguiente párrafo
-
-                parrafos_procesados.append(parrafos[i])
-
-                i += 1
-
-
-            # Buscar palabras clave en los párrafos
-            for palabra in palabrasClave:
-                # Expresión regular para buscar la palabra completa
-                pattern = rf'\b{re.escape(palabra)}\b'
-                encontrada = False
-
-                for i, parrafo in enumerate(parrafos, start=1):
-                    matches = re.findall(pattern, parrafo, flags=re.IGNORECASE)
-                    count = len(matches)
-                   
-
-                    if count > 0:
-                        if not encontrada:
-                            ##print(f"EL PARRAFO NUMERO {i} DICE: " + parrafo)
-                            print(f"\nPalabra clave: '{palabra}' encontrada en la página {page_number}, párrafo {i}")
-                            print(f"El parrafo dice:  {parrafo}")
-                            encontrada = True
-
-
-def devolverPrimeraPalabraParrafo(parrafo):
-
-    palabras = parrafo.split()
-
-    return palabras[0] if palabras else None
-
-def devolverUltimaPalabraParrafo(parrafo):
-
-    palabras = parrafo.split()
-
-    return palabras[-1] if palabras else None
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({"error": "Error al agregar el comentario.", "details": str(e)}), 500
+    except Exception as e:
+        return jsonify({"error": "Ocurrió un error inesperado.", "details": str(e)}), 500
 
 
 # GET, PATCH Y DELETE DE EJEMPLOS #
