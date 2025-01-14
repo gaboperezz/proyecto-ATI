@@ -11,6 +11,7 @@ from pdfminer.layout import LTTextContainer
 import pymupdf # Para usar fitz
 import fitz 
 import io
+import deep_translator
 
 #
 usuarioLogueado = None
@@ -59,7 +60,7 @@ def crear_usuario():
             jsonify({"message": "Las credenciales no pueden estar vacías."}),
             400
         )
-    
+
     if User.query.filter_by(username=user).first():
         return jsonify({"error": "El usuario ya existe"}), 400
     
@@ -231,6 +232,60 @@ def cargar_pdf():
         db.session.rollback()
         return jsonify({"error": "Error al subir el archivo.", "details": str(e)}), 500
     
+    # TRADUCIR PDF
+    from deep_translator import GoogleTranslator
+
+@app.route('/translate/pdf', methods=['POST'])
+@jwt_required()
+def traducir_pdf():
+    try:
+        # Obtener el archivo y el idioma de destino desde la solicitud
+        file = request.files.get('document')
+        target_language = request.form.get('target_language', 'en')  # Idioma predeterminado: inglés
+
+        # Validar que se haya enviado un archivo
+        if 'document' not in request.files or file.filename == '':
+            return jsonify({"error": "No se envió ningún archivo o el archivo no tiene nombre."}), 400
+
+        if not file.filename.endswith('.pdf'):
+            return jsonify({"error": "Solo se permiten archivos PDF."}), 400
+
+        # Leer el PDF
+        pdf_document = fitz.open(stream=file.read(), filetype="pdf")
+        translated_pdf = fitz.open()  # Crear un nuevo PDF
+
+        # Traducir cada página
+        translator = deep_translator.GoogleTranslator(source='auto', target=target_language)
+        for page_number in range(len(pdf_document)):
+            page = pdf_document[page_number]
+            text = page.get_text()
+            
+            # Traducir el texto extraído
+            translated_text = translator.translate(text)
+            
+            # Crear una nueva página en el PDF traducido
+            rect = page.rect  # Tamaño de la página original
+            new_page = translated_pdf.new_page(width=rect.width, height=rect.height)
+            new_page.insert_text(rect.topleft, translated_text, fontsize=12)
+
+        # Guardar el nuevo PDF en memoria
+        output_stream = io.BytesIO()
+        translated_pdf.save(output_stream)
+        translated_pdf.close()
+        pdf_document.close()
+
+        # Enviar el PDF traducido como respuesta
+        output_stream.seek(0)
+        return send_file(
+            output_stream,
+            as_attachment=True,
+            download_name="translated_document.pdf",
+            mimetype="application/pdf"
+        )
+
+    except Exception as e:
+        return jsonify({"error": "Error al traducir el archivo PDF.", "details": str(e)}), 500
+
 
 # OBTENER DOCUMENTOS DEL USUARIO #
 @app.route('/user/documentos', methods=['GET'])

@@ -18,6 +18,8 @@ document.getElementById("btnRegistro").addEventListener("click", async () => {
     const username = document.getElementById("txtRegistroUsuario").value;
     const password = document.getElementById("txtRegistroPassword").value;
 
+    
+
     const response = await fetch(`${API_URL}/crear_usuario`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -122,6 +124,57 @@ document.getElementById("form-PDF").addEventListener("submit", async (event) => 
     }
 });
 
+/* TRADUCIR PDF */
+document.getElementById("form-traducirPDF").addEventListener("submit", async (event) => {
+    event.preventDefault(); // Prevenir el envío por defecto del formulario
+
+    // Obtener los documentos seleccionados
+    const documentosSeleccionados = Array.from(
+        document.querySelectorAll("#listaDocumentos input:checked")
+    ).map((checkbox) => checkbox.value);
+
+    if (documentosSeleccionados.length === 0) {
+        alert("Por favor, selecciona al menos un archivo PDF para traducir.");
+        return;
+    }
+
+    try {
+        // Enviar solicitud al backend
+        const response = await fetch(`${API_URL}/translate/pdf`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                documentos: documentosSeleccionados, // IDs de los documentos seleccionados
+            }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            alert(`Error: ${errorData.error}`);
+            console.error(errorData.details);
+            return;
+        }
+
+        // Recibir el PDF traducido
+        const blob = await response.blob();
+
+        // Crear una URL temporal para el PDF traducido
+        const pdfUrl = URL.createObjectURL(blob);
+
+        // Abrir el PDF en una nueva pestaña
+        window.open(pdfUrl, "_blank");
+
+        // Liberar la URL creada después de abrirla
+        URL.revokeObjectURL(pdfUrl);
+    } catch (error) {
+        console.error("Error al traducir el PDF:", error);
+        alert("Ocurrió un error al intentar traducir el archivo.");
+    }
+});
+
 
 /* AGREGAR PALABRA CLAVE */
 
@@ -179,7 +232,6 @@ document.getElementById("form-txt").addEventListener("submit", async (event) => 
         alert("Ocurrió un error al intentar subir el archivo.");
     }
 });
-
 
 // CARGAR LISTA DE PALABRAS CLAVE
 async function cargarPalabrasClave() {
