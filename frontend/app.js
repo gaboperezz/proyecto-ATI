@@ -50,6 +50,7 @@ document.getElementById("btnLogin").addEventListener("click", async () => {
         localStorage.setItem("token", resultado.token);
         localStorage.setItem("idLogueado", resultado.idUsuario);
         cargarDocumentos();
+        cargarDocumentos2();
         cargarPalabrasClave();
         document.getElementById("divLogin").style.display = "none";
         document.getElementById("divMenuPrincipal").style.display = "block";
@@ -129,9 +130,10 @@ document.getElementById("form-traducirPDF").addEventListener("submit", async (ev
     event.preventDefault(); // Prevenir el envío por defecto del formulario
 
     // Obtener los documentos seleccionados
-    const documentosSeleccionados = Array.from(
-        document.querySelectorAll("#listaDocumentos input:checked")
-    ).map((checkbox) => checkbox.value);
+    const documentosSeleccionados = Array.from(document.querySelectorAll("#listaDocumentos2 input:checked"))
+    .map(checkbox => checkbox.value);
+
+   // print(documentosSeleccionados)
 
     if (documentosSeleccionados.length === 0) {
         alert("Por favor, selecciona al menos un archivo PDF para traducir.");
@@ -147,7 +149,7 @@ document.getElementById("form-traducirPDF").addEventListener("submit", async (ev
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                documentos: documentosSeleccionados, // IDs de los documentos seleccionados
+                idsDocumentos2: documentosSeleccionados, // IDs de los documentos seleccionados
             }),
         });
 
@@ -291,6 +293,8 @@ async function eliminarPalabraClave(idPalabraClave){
 
 // CARGAR DOCUMENTOS PARA BUSQUEDA
 // Cargar lista de documentos
+
+
 async function cargarDocumentos() {
     const response = await fetch(`${API_URL}/user/documentos`, {
         method: "GET",
@@ -322,6 +326,39 @@ async function cargarDocumentos() {
         alert(data.details)
     }
 }
+
+async function cargarDocumentos2() {
+    const response = await fetch(`${API_URL}/user/documentos`, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("token")}`
+        }
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+        const listaDocumentos = document.getElementById("listaDocumentos2");
+        data.documents.forEach(doc => {
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.value = doc.id;
+            checkbox.id = `doc-${doc.id}`;
+
+            const label = document.createElement("label");
+            label.htmlFor = `doc-${doc.id}`;
+            label.textContent = doc.name;
+
+            const br = document.createElement("br");
+            listaDocumentos.appendChild(checkbox);
+            listaDocumentos.appendChild(label);
+            listaDocumentos.appendChild(br);
+        });
+    } else {
+        alert("Error al cargar documentos: " + data.error);
+        alert(data.details)
+    }
+}
+
 
 /* REALIZAR BUSQUEDA */
 // btnRealizarBusqueda
