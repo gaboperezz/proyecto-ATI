@@ -233,12 +233,22 @@ def cargar_pdf():
         db.session.rollback()
         return jsonify({"error": "Error al subir el archivo.", "details": str(e)}), 500
     
-# DIVIDIR EL TEXTO #
+# Dividir el texto en fragmentos
 def split_text(text, max_length=4999):
     """Divide el texto en fragmentos de longitud máxima 'max_length'."""
     return [text[i:i + max_length] for i in range(0, len(text), max_length)]
 
-# TRADUCIR PDF #
+# Limpiar texto (eliminar caracteres no ASCII)
+def clean_text(text):
+    # Eliminar caracteres no ASCII y reemplazarlos con un espacio
+    return re.sub(r'[^\x00-\x7F]+', '-', text)
+
+# Función para extraer las tablas de un PDF
+def extract_tables(pdf_path):
+    tables = camelot.read_pdf(pdf_path, pages='all', flavor='stream')
+    return tables
+
+# Función para traducir el PDF
 @app.route('/translate/pdf', methods=['POST'])
 @jwt_required()
 def traducir_pdf():
@@ -248,8 +258,6 @@ def traducir_pdf():
 
         ids_documentos = data.get('idsDocumentos2')
         target_language = data.get('target_language', 'en')  # Idioma predeterminado: inglés
-
-        print(ids_documentos)
 
         # Validar que se haya enviado un ID de documento
         if not ids_documentos:
@@ -261,14 +269,16 @@ def traducir_pdf():
             return jsonify({"error": "No se encontraron documentos válidos para el usuario."}), 404
 
         translated_pdf = fitz.open()  # Crear un nuevo PDF
+        translator = deep_translator.GoogleTranslator(source='auto', target=target_language)
 
         # Traducir cada documento
-        translator = deep_translator.GoogleTranslator(source='auto', target=target_language)
         for document in documents:
-            # Aquí debes obtener el archivo PDF desde tu almacenamiento, por ejemplo, desde el almacenamiento de archivos de la base de datos
-            pdf_stream = open(document.file_path, 'rb')  # Abrir el archivo desde la ruta
+            # Abrir el archivo PDF desde la ruta
+            pdf_stream = open(document.file_path, 'rb')  
             pdf_document = fitz.open(pdf_stream)
 
+            # Extraer las tablas del PDF original
+            tables = extract_tables(document.file_path)
 
             # Traducir cada página
             for page_number in range(len(pdf_document)):
@@ -282,13 +292,48 @@ def traducir_pdf():
                 
                 # Traducir cada fragmento
                 for fragment in text_fragments:
-                    translated_text += translator.translate(fragment)
+                    clean_fragment = clean_text(fragment)  # Limpiar el texto antes de traducir
+                    translated_text += translator.translate(clean_fragment)
+
+                padding_x = 20  # Margen izquierdo y derecho
+                padding_y = 30  # Margen superior e inferior
 
                 # Crear una nueva página en el PDF traducido
                 rect = page.rect  # Tamaño de la página original
-                x0, y0 = rect.x0, rect.y0  # Coordenadas de la esquina superior izquierda
                 new_page = translated_pdf.new_page(width=rect.width, height=rect.height)
-                new_page.insert_text((x0, y0), translated_text, fontsize=12)  # Usar las coordenadas correctas
+
+                # Calcular las coordenadas iniciales con margen
+                x_start = rect.x0 + padding_x
+                y_start = rect.y0 + padding_y
+
+                # Asegurarse de que el texto traducido no exceda los límites de la página
+                max_width = rect.width - 2 * padding_x
+                max_height = rect.height - 2 * padding_y
+
+                # Insertar el texto traducido en la nueva página respetando el margen
+                new_page.insert_textbox(
+                    fitz.Rect(x_start, y_start, x_start + max_width, y_start + max_height),
+                    translated_text,
+                    fontsize=12,
+                    align=0  # Alinear el texto a la izquierda (opcional)
+                )
+
+                # Si hay tablas para esta página, insertarlas en la nueva página
+                for table in tables:
+                    # Verificar si la tabla está en la página actual
+                    if table.page == page_number + 1:  # camelot usa una indexación de páginas basada en 1
+                        table_data = table.df
+
+                        # Verificar que table_data sea un DataFrame y que tenga filas
+                        if isinstance(table_data, pd.DataFrame):
+                            for _, row in table_data.iterrows():
+                                # Convertir cada celda a cadena y unirlas
+                                row_text = " | ".join(str(cell) for cell in row)
+                                table_text = row_text + "\n"
+
+                                # Determinar la posición de la tabla en la página
+                                table_rect = fitz.Rect(x_start, y_start + max_height + padding_y, x_start + max_width, y_start + max_height + 200)
+                                new_page.insert_textbox(table_rect, table_text, fontsize=10)
 
             pdf_document.close()  # Cerrar el documento después de traducir
 
