@@ -12,7 +12,7 @@ CORS(app)
 
 pwd = 'RV71ok9%"5Og'
 
-DATABASE_URI = "mssql+pyodbc://gabo:1357@localhost/db_prueba?driver=ODBC+Driver+17+for+SQL+Server"
+DATABASE_URI = "mssql+pyodbc://gabo:1357@GONZA\\SQLEXPRESS/db_prueba?driver=ODBC+Driver+17+for+SQL+Server"
 # "mssql+pyodbc://gabo:1357@GONZA\\SQLEXPRESS/db_prueba?driver=ODBC+Driver+17+for+SQL+Server"
 #"mssql+pyodbc://gabo:1357@localhost/db_prueba?driver=ODBC+Driver+17+for+SQL+Server"
 

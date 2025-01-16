@@ -7,124 +7,102 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Botones Logout y Protected ocultos inicialmente -->
+    <div id="botonesMenu" style="position: fixed; top: 10px; left: 10px; z-index: 1000; display: none;">
+        <button type="button" id="btnLogout">Logout</button>
+        <button type="button" id="btnProtected">PROTECTED</button>
+    </div>
+
     <header>
         <h1>Buscador de palabras clave</h1>
     </header>
+    
     <main>
-
         <!-- SECCIONES -->
-         <!-- LOGIN -->
-     <div id="divLogin">
-        <!-- <form id="formLogin"> -->
+        <!-- LOGIN -->
+        <div id="divLogin">
+            <h2> Log In </h2>
             <input type="text" id="txtLoginUsuario" placeholder="Usuario" required>
             <input type="password" id="txtLoginPassword" placeholder="Contraseña" required>
             <button type="button" id="btnLogin">Login</button>
             <button type="button" id="btnIrARegistro">Registrarme</button>
-        <!-- </form> -->
-     </div>
-
-     <!-- REGISTRO -->
-     <div id="divRegistrar" style="display: none;">
-        <input type="text" id="txtRegistroUsuario" placeholder="Usuario" required>
-        <input type="password" id="txtRegistroPassword" placeholder="Contraseña" required>
-        <button type="button" id="btnRegistro">Confirmar registro</button>
-        <button type="button" id="btnIrALogin">Volver a login</button>
-     </div>
-
-     <!-- MENU PRINCIPAL -->
-     <div id="divMenuPrincipal" style="display: none;">
-
-        <button type="button" id="btnLogout">Logout</button>
-        <button type="button" id="btnProtected">PROTECTED</button>
-
-        <!-- <button type="button">Adjuntar archivo PDF</button> -->
-            <!-- Formulario para Subir un PDF -->
-        <h1>Carga de archivos PDF</h1>
-        <form id="form-PDF">
-            <label for="pdfFile">Seleccione un archivo PDF:</label>
-            <input type="file" id="pdfFile" name="pdfFile" accept=".pdf" required><br>
-            <button type="submit">Subir PDF</button>
-        </form>
-
-
-     <!-- TRADUCIR PDF A INGLES-->
-    <div id="divMenuPrincipalTraducirPdf">
-        <h1> Traducir PDF </h1>
-    
-        <div id="listaDocumentos2">
-            <h2>Selecciona documentos para la búsqueda</h2>
-            <!-- Aquí se cargará dinámicamente la lista de documentos -->
         </div>
 
-            <form id="form-traducirPDF" enctype="multipart/form-data">
-                <button type="submit">Traducir PDF</button>
-            </form>
-    </div>
-
-        <div id="divMenuPalabrasClave">
-            <!-- AGREGAR PALABRA CLAVE -->
-            <h1>Palabras clave</h1>
-
-            <input type="text" id="txtPalabraClave" placeholder="Ingrese palabra clave">
-            <button type="button" id="btnAgregarPalabraClave">Agregar palabra clave</button><br>
-
-            <form id="form-txt">
-                <p>o puedes subir un archivo con palabras clave:</p>
-                <label for="txtFile">Seleccione un archivo .txt:</label>
-                <input type="file" id="txtFile" name="txtFile" accept=".txt" required><br>
-                <button type="submit">Cargar palabras clave</button>
-            </form><br>
-
-            <!-- ELIMINAR PALABRA CLAVE -->
-             <div id="listaPalabrasClave">
-                <h2>Listado de palabras clave</h2>
-             </div>
-        </div>
-        
-
-
-
-
-        <!-- BUSQUEDAS -->
-        <!-- REALIZAR BUSQUEDA -->
-        <h1>Búsquedas</h1>
-        <!-- VER BUSQUEDAS -->
-        <button type="button" id="btnVerBusquedas">Ver búsquedas anteriores</button>
-
-        <div id="listaDocumentos">
-            <h2>Selecciona documentos para la búsqueda</h2>
-            <!-- Aquí se cargará dinámicamente la lista de documentos -->
+        <!-- REGISTRO -->
+        <div id="divRegistrar" style="display: none;">
+            <h2> Registrarse </h2>
+            <input type="text" id="txtRegistroUsuario" placeholder="Elige tu usuario" required>
+            <input type="password" id="txtRegistroPassword" placeholder="Elige tu contraseña" required>
+            <button type="button" id="btnRegistro">Confirmar registro</button>
+            <button type="button" id="btnIrALogin">Volver a login</button>
         </div>
 
-        <form id="form-busqueda">
-            <label for="nombreBusqueda">Nombre de la Búsqueda:</label>
-            <input type="text" id="nombreBusqueda" placeholder="Nombre opcional">
-    
-            <button type="submit">Realizar Búsqueda</button>
-        </form>
+        <!-- MENU PRINCIPAL -->
+        <div id="divMenuPrincipal" style="display: none;">
+            <div id="divMenuPrincipalCargaDeArchivos">
+                <h1>Carga de archivos PDF</h1>
+                <form id="form-PDF">
+                    <label for="pdfFile">Seleccione un archivo PDF:</label>
+                    <input type="file" id="pdfFile" name="pdfFile" accept=".pdf" required><br>
+                    <button type="submit" id="btnSubirPdf">Subir PDF</button>
+                </form>
+            </div>
 
-        <!-- <button type="button" id="btnRealizarBusqueda">Realizar búsqueda</button> -->
+            <!-- TRADUCIR PDF A INGLES-->
+            <div id="divMenuPrincipalTraducirPdf">
+                <h1> Traducir PDF </h1>
+                <div id="listaDocumentos2">
+                    <h2>Selecciona documentos para la búsqueda</h2>
+                </div>
+                <form id="form-traducirPDF" enctype="multipart/form-data">
+                    <button type="submit" id="btnTraducirPdf">Traducir PDF</button>
+                </form>
+            </div>
 
-        <h2>Actualizar Comentario de Búsqueda</h2>
-        <form id="agregarComentario">
+            <div id="divMenuPalabrasClave">
+                <h1>Palabras clave</h1>
+                <input type="text" id="txtPalabraClave" placeholder="Ingrese palabra clave">
+                <button type="button" id="btnAgregarPalabraClave">Agregar palabra clave</button><br>
+                <form id="form-txt">
+                    <p>o puedes subir un archivo con palabras clave:</p>
+                    <label for="txtFile">Seleccione un archivo .txt:</label>
+                    <input type="file" id="txtFile" name="txtFile" accept=".txt" required><br>
+                    <button type="submit" id="btnCargarPalabras">Cargar palabras clave</button>
+                </form><br>
+                <div id="listaPalabrasClave">
+                    <h2>Listado de palabras clave</h2>
+                </div>
+            </div>
 
-            <!-- Hacer que, inmediatamente luego de realizar una busqueda,
-             se despliegue este menu ya con el id de la busqueda puesto para mandar
-             y que luego de hacer el comment este menu desaparezca -->
+                        <!-- Caja para Búsquedas -->
+            <div class="box-busquedas">
+                <h1 class="titulo-busquedas">Búsquedas</h1>
+                <button type="button" id="btnVerBusquedas" class="btn-ver-busquedas">Ver búsquedas anteriores</button>
 
-            <label for="searchId">ID de la Búsqueda:</label>
-            <input type="number" id="searchId" placeholder="ID de la búsqueda" required>
-    
-            <label for="newComment">Nuevo Comentario:</label>
-            <textarea id="newComment" placeholder="Comentario"></textarea>
-    
-            <button type="submit">Actualizar Comentario</button>
-        </form>
+                <div id="listaDocumentos" class="lista-documentos">
+                    <h2>Selecciona documentos para la búsqueda</h2>
+                </div>
 
-     </div>
+                <form id="form-busqueda" class="form-busqueda">
+                    <label for="nombreBusqueda">Nombre de la Búsqueda:</label>
+                    <input type="text" id="nombreBusqueda" placeholder="Nombre opcional" class="input-busqueda">
+                    <button type="submit" class="btn-realizar-busqueda" id="btnRealizarBusqueda">Realizar Búsqueda</button>
+                </form>
+
+                <h2 class="titulo-actualizar-comentario">Actualizar Comentario de Búsqueda</h2>
+                <form id="agregarComentario" class="form-comentario">
+                    <label for="searchId">ID de la Búsqueda:</label>
+                    <input type="number" id="searchId" placeholder="ID de la búsqueda" required class="input-comentario">
+
+                    <label for="newComment">Nuevo Comentario:</label>
+                    <textarea id="newComment" placeholder="Comentario" class="textarea-comentario"></textarea>
+
+                    <button type="submit" class="btn-actualizar-comentario">Actualizar Comentario</button>
+                </form>
+            </div>
 
     </main>
-    <script src="app.js"></script>
     
+    <script src="app.js"></script>
 </body>
 </html>

@@ -56,6 +56,8 @@ document.getElementById("btnLogin").addEventListener("click", async () => {
         document.getElementById("divMenuPrincipal").style.display = "block";
         document.getElementById("txtLoginUsuario").value = "";
         document.getElementById("txtLoginPassword").value = "";
+
+        document.getElementById("botonesMenu").style.display = "block";
         // document.getElementById("task-form").style.display = "block";
         // fetchTasks();
     } else {
@@ -69,6 +71,9 @@ document.getElementById("btnLogout").addEventListener("click", async () => {
     document.getElementById("divLogin").style.display = "block";
     document.getElementById("divMenuPrincipal").style.display = "none";
     document.getElementById("divRegistrar").style.display = "none";
+
+    document.getElementById("botonesMenu").style.display = "none";
+
     alert("Sesion cerrada.")
 });
 

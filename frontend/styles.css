@@ -1,48 +1,229 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
+    background-color: #f0f0f0;
     margin: 0;
     padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
 }
 
 header {
     background-color: #9263ff;
     color: white;
     text-align: center;
-    padding: 1rem;
+    padding: 20px;
+}
+
+h1 {
+    margin: 0;
 }
 
 main {
-    padding: 2rem;
-}
-
-form {
-    /* display: flex; */
-    gap: 10px;
-}
-
-#listaPalabrasClave {
-    list-style: none;
-    padding: 0;
-}
-
-#listaPalabrasClave li {
     display: flex;
-    justify-content: space-between;
-    background: #fff;
-    padding: 10px;
-    margin: 5px 0;
-    border: 1px solid #ddd;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+    width: 100%;
+    margin-top: -50px; /* Ajusta la posición del divLogin respecto al header */
 }
 
-button {
-    background: #007bff;
+#divLogin, #divRegistrar {
+    background-color: #e0f7fa;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 300px;
+}
+
+#divLogin input, #divRegistrar input {
+    display: block;
+    width: 90%;
+    margin: 10px auto;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#divLogin button, #divRegistrar button {
+    background-color: #007bb5;
     color: white;
     border: none;
-    padding: 5px 10px;
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin: 10px auto;
+    cursor: pointer;
+    width: 90%;
+}
+
+#divLogin button:hover, #divRegistrar button:hover {
+    background-color: #005f87;
+}
+
+#divRegistrar button#btnIrALogin, #divLogin button#btnIrARegistro {
+    margin-top: 50px;
+    padding: 8px 24px;
+}
+
+/* Estilo común para los contenedores de cada sección */
+/* Establecer el contenedor con Flexbox para distribuir los elementos */
+#divMenuPrincipal {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Espaciado entre los divs internos */
+    padding: 40px; /* Un poco de espacio alrededor del contenido */
+    position: relative; /* Necesario para los botones absolutos */
+}
+
+/* Estilo para los botones de logout y protected */
+#btnLogout, #btnProtected, #btnSubirPdf, #btnTraducirPdf, #btnAgregarPalabraClave, #btnCargarPalabras, #txtFile, #pdfFile{
+    background-color: #007bb5;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: auto;
+}
+
+#btnLogout:hover, #btnProtected:hover {
+    background-color: #005f87;
+}
+
+/* Estilo para los títulos dentro del div de menú */
+#divMenuPrincipal h1 {
+    margin-top: 0; /* Elimina márgenes extra en el primer título */
+}
+
+/* Cargar archivos PDF */
+#divMenuPrincipalCargaDeArchivos {
+    background-color: #e0f7fa;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Otros divs (como Traducir PDF, Palabras clave, etc.) */
+#divMenuPrincipalTraducirPdf,
+#divMenuPalabrasClave {
+    background-color: #e0f7fa;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilos Generales para la Sección de Búsquedas */
+.titulo-busquedas {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.lista-documentos {
+    margin-bottom: 20px;
+}
+
+.lista-documentos h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.form-busqueda {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.input-busqueda {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+.btn-realizar-busqueda {
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    background-color: #007BFF;
+    color: white;
     cursor: pointer;
 }
 
-button:hover {
-    background: #0056b3;
+.btn-realizar-busqueda:hover {
+    background-color: #0056b3;
+}
+
+.titulo-actualizar-comentario {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.form-comentario {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.input-comentario {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+.textarea-comentario {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    height: 100px;
+}
+
+.btn-actualizar-comentario {
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    background-color: #28a745;
+    color: white;
+    cursor: pointer;
+}
+
+.btn-actualizar-comentario:hover {
+    background-color: #218838;
+}
+
+/* Botón Ver búsquedas anteriores */
+.btn-ver-busquedas {
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    background-color: #ffc107;
+    color: black;
+    cursor: pointer;
+}
+
+.btn-ver-busquedas:hover {
+    background-color: #e0a800;
+}
+
+/* Caja Azul para la Sección de Búsquedas */
+.box-busquedas {
+    background-color: #f0f8ff; /* Color de fondo suave */
+    border: 2px solid #007bff; /* Borde azul */
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave */
+}
+
+.box-busquedas h1, .box-busquedas h2 {
+    color: #007bff; /* Color de los títulos */
+}
+
+.box-busquedas button {
+    margin-top: 10px;
 }
