@@ -61,9 +61,22 @@ main {
     background-color: #005f87;
 }
 
-#divRegistrar button#btnIrALogin, #divLogin button#btnIrARegistro {
-    margin-top: 50px;
+#divRegistrar button#btnIrALogin, #divLogin button#btnIrARegistro{
+    margin-top: 10px;
     padding: 8px 24px;
+}
+
+#divLogin p{
+    margin-top: 50px;
+}
+
+#divLogin img, #divRegistrar img{
+    position: absolute; 
+    right: 820px; 
+    transform: translateY(-160%); 
+    cursor: pointer; 
+    width: 24px; 
+    height: 24px;
 }
 
 /* Estilo común para los contenedores de cada sección */
@@ -76,142 +89,8 @@ main {
     position: relative; /* Necesario para los botones absolutos */
 }
 
-/* Estilo para los botones de logout y protected */
-#btnLogout, #btnProtected, #btnSubirPdf, #btnTraducirPdf, #btnAgregarPalabraClave, #btnCargarPalabras, #txtFile, #pdfFile{
-    background-color: #007bb5;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    width: auto;
-}
-
-#btnLogout:hover, #btnProtected:hover {
-    background-color: #005f87;
-}
-
-/* Estilo para los títulos dentro del div de menú */
-#divMenuPrincipal h1 {
-    margin-top: 0; /* Elimina márgenes extra en el primer título */
-}
-
-/* Cargar archivos PDF */
-#divMenuPrincipalCargaDeArchivos {
-    background-color: #e0f7fa;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Otros divs (como Traducir PDF, Palabras clave, etc.) */
-#divMenuPrincipalTraducirPdf,
-#divMenuPalabrasClave {
-    background-color: #e0f7fa;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Estilos Generales para la Sección de Búsquedas */
-.titulo-busquedas {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 20px;
-}
-
-.lista-documentos {
-    margin-bottom: 20px;
-}
-
-.lista-documentos h2 {
-    font-size: 18px;
-    margin-bottom: 10px;
-}
-
-.form-busqueda {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.input-busqueda {
-    padding: 8px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    font-size: 16px;
-}
-
-.btn-realizar-busqueda {
-    padding: 10px;
-    border-radius: 5px;
-    border: none;
-    background-color: #007BFF;
-    color: white;
-    cursor: pointer;
-}
-
-.btn-realizar-busqueda:hover {
-    background-color: #0056b3;
-}
-
-.titulo-actualizar-comentario {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-.form-comentario {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.input-comentario {
-    padding: 8px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    font-size: 16px;
-}
-
-.textarea-comentario {
-    padding: 8px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    font-size: 16px;
-    height: 100px;
-}
-
-.btn-actualizar-comentario {
-    padding: 10px;
-    border-radius: 5px;
-    border: none;
-    background-color: #28a745;
-    color: white;
-    cursor: pointer;
-}
-
-.btn-actualizar-comentario:hover {
-    background-color: #218838;
-}
-
-/* Botón Ver búsquedas anteriores */
-.btn-ver-busquedas {
-    padding: 10px;
-    border-radius: 5px;
-    border: none;
-    background-color: #ffc107;
-    color: black;
-    cursor: pointer;
-}
-
-.btn-ver-busquedas:hover {
-    background-color: #e0a800;
-}
-
-/* Caja Azul para la Sección de Búsquedas */
-.box-busquedas {
+/* Estilo general para todos los divs del menú principal */
+#divMenuPrincipal > div {
     background-color: #f0f8ff; /* Color de fondo suave */
     border: 2px solid #007bff; /* Borde azul */
     border-radius: 10px;
@@ -220,10 +99,35 @@ main {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave */
 }
 
-.box-busquedas h1, .box-busquedas h2 {
+#divMenuPrincipal h1, #divMenuPrincipal h2 {
     color: #007bff; /* Color de los títulos */
 }
 
-.box-busquedas button {
+#divMenuPrincipal button {
     margin-top: 10px;
+    background-color: #007bb5;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#divMenuPrincipal button:hover {
+    background-color: #005f87;
+}
+
+#btnLogout, #btnProtected{
+	background-color: #007bb5;
+	color: white;
+	border: none;
+	padding: 10px 15px;
+    margin-top: 10px;
+	border-radius: 5px;
+	cursor: pointer;
+	width: auto;
+}
+
+#btnLogout:hover, #btnProtected:hover{
+	background-color: #005f87;
 }

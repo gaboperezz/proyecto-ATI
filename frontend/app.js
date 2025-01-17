@@ -78,6 +78,35 @@ document.getElementById("btnLogout").addEventListener("click", async () => {
 });
 
 
+/* LOGICA DEL OJO CONTRASEÑA */
+document.getElementById("togglePasswordLogin").addEventListener("click", () => {
+    const passwordInput = document.getElementById("txtLoginPassword");
+    const togglePasswordIcon = document.getElementById("togglePasswordLogin");
+
+    // Alternar el tipo del campo entre 'password' y 'text'
+    if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        togglePasswordIcon.src = "imgs/ojo-abierto.png"; // Cambiar a ícono de ojo cerrado
+    } else {
+        passwordInput.type = "password";
+        togglePasswordIcon.src = "imgs/ojo-cerrado.png"; // Cambiar a ícono de ojo abierto
+    }
+});
+
+document.getElementById("togglePasswordRegistro").addEventListener("click", () => {
+    const passwordInput = document.getElementById("txtRegistroPassword");
+    const togglePasswordIcon = document.getElementById("togglePasswordRegistro");
+
+    // Alternar el tipo del campo entre 'password' y 'text'
+    if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        togglePasswordIcon.src = "imgs/ojo-abierto.png"; // Cambiar a ícono de ojo cerrado
+    } else {
+        passwordInput.type = "password";
+        togglePasswordIcon.src = "imgs/ojo-cerrado.png"; // Cambiar a ícono de ojo abierto
+    }
+});
+
 /* PROTECTED DE EJEMPLO (pide autorizacion en el header) */
 document.getElementById("btnProtected").addEventListener("click", async () =>{
     const response = await fetch(`${API_URL}/protected`, {

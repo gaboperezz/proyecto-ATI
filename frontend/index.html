@@ -23,8 +23,14 @@
         <div id="divLogin">
             <h2> Log In </h2>
             <input type="text" id="txtLoginUsuario" placeholder="Usuario" required>
-            <input type="password" id="txtLoginPassword" placeholder="Contraseña" required>
+            
+            <div>
+                <input type="password" id="txtLoginPassword" placeholder="Contraseña" required>
+                <img id="togglePasswordLogin" src="imgs/ojo-cerrado.png" alt="Mostrar contrasena"> 
+            </div>
+
             <button type="button" id="btnLogin">Login</button>
+            <p id="txtIrARegistro"> ¿No tienes cuenta?
             <button type="button" id="btnIrARegistro">Registrarme</button>
         </div>
 
@@ -32,7 +38,10 @@
         <div id="divRegistrar" style="display: none;">
             <h2> Registrarse </h2>
             <input type="text" id="txtRegistroUsuario" placeholder="Elige tu usuario" required>
-            <input type="password" id="txtRegistroPassword" placeholder="Elige tu contraseña" required>
+            <div>
+                <input type="password" id="txtRegistroPassword" placeholder="Elige tu contraseña" required>
+                <img id="togglePasswordRegistro" src="imgs/ojo-cerrado.png" alt="Mostrar contrasena"> 
+            </div>
             <button type="button" id="btnRegistro">Confirmar registro</button>
             <button type="button" id="btnIrALogin">Volver a login</button>
         </div>
