@@ -8,12 +8,7 @@ body {
     height: 100vh;
 }
 
-header {
-    background-color: #9263ff;
-    color: white;
-    text-align: center;
-    padding: 20px;
-}
+
 
 h1 {
     margin: 0;
@@ -22,10 +17,18 @@ h1 {
 main {
     display: flex;
     justify-content: center;
+    background-color: #4b6a82;
     align-items: center;
     flex-grow: 1;
     width: 100%;
-    margin-top: -50px; /* Ajusta la posición del divLogin respecto al header */
+    margin-top: -10px; /* Ajusta la posición del divLogin respecto al header */
+}
+
+header {
+    background-color: #9263ff;
+    color: white;
+    text-align: center;
+    padding: 20px;
 }
 
 #divLogin, #divRegistrar {
