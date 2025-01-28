@@ -13,6 +13,12 @@ import fitz
 import io
 import deep_translator
 from io import BytesIO
+import os
+import requests
+from bs4 import BeautifulSoup
+import webbrowser
+import re
+
 
 #
 usuarioLogueado = None
@@ -209,11 +215,11 @@ def cargar_pdf():
         return jsonify({"error": "Solo se permiten archivos PDF."}), 400
 
     # Generar la ruta completa del archivo
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+    file_path = os.path.join(app.config['UPLOAD_carpeta'], file.filename)
 
     try:
         # Guardar el archivo en el sistema de archivos
-        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)  # Crear el directorio si no existe
+        os.makedirs(app.config['UPLOAD_carpeta'], exist_ok=True)  # Crear el directorio si no existe
         file.save(file_path)
 
         # Guardar información en la base de datos
@@ -355,6 +361,7 @@ def traducir_pdf():
         print(str(e))
         return jsonify({"error": "Error al traducir el archivo PDF.", "details": str(e)}), 500
 
+
 # OBTENER DOCUMENTOS DEL USUARIO #
 @app.route('/user/documentos', methods=['GET'])
 @jwt_required()
@@ -367,7 +374,447 @@ def get_documentos_usuario():
         return jsonify({"documents": document_list}), 200
     except Exception as e:
         return jsonify({"error": "Error al obtener documentos del usuario.", "details": str(e)}), 500
+    
 
+            # EMPIEZA EL SCRAPPING #
+
+import os
+import requests
+from bs4 import BeautifulSoup
+import re
+from flask import jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
+# Función para crear carpetas
+
+def crear_carpeta(nombre_carpeta):
+    if not os.path.exists(nombre_carpeta):
+        os.makedirs(nombre_carpeta)
+
+def descargar_y_abrir_pdf(articulo_url, carpeta, is_revurugcardiol=False):
+    try:
+        # Obtener el contenido de la página del artículo
+        respuesta = requests.get(articulo_url)
+        respuesta.raise_for_status()
+        soup = BeautifulSoup(respuesta.text, "html.parser")
+
+        # Si es la revista revurugcardiol.org.uy, buscar dentro del div con clase 'seccion-pdf'
+        if is_revurugcardiol:
+            pdf_div = soup.find("div", class_="seccion-pdf")
+            if pdf_div:
+                pdf_link = pdf_div.find("a", href=True)
+                if pdf_link and "href" in pdf_link.attrs:
+                    pdf_url = requests.compat.urljoin(articulo_url, pdf_link["href"])
+                    # Abrir el PDF en el navegador
+                    webbrowser.open(pdf_url)
+                else:
+                    print(f"No se encontró PDF: {articulo_url}")
+            else:
+                print(f"No se encontró la sección: {articulo_url}")
+        else:
+            # Buscar el enlace al visor de PDF (con clase específica) para otras revistas
+            pdf_viewer_link = soup.find("a", {"class": "obj_galley_link pdf"})
+            if pdf_viewer_link:
+                pdf_url = requests.compat.urljoin(articulo_url, pdf_viewer_link["href"])
+                print(f"Pdf viewer link: {pdf_url}")
+                # Abrir el PDF en el navegador
+                webbrowser.open(pdf_url)
+            else:
+                print(f"No se encontró el pdf viewer link: {articulo_url}")
+    except Exception as e:
+        print(f"Error al procesare articulo:  {articulo_url}: {e}")
+
+
+def ultima_revista(url_base):
+    try:
+        respuesta = requests.get(url_base)
+        respuesta.raise_for_status()
+        soup = BeautifulSoup(respuesta.text, "html.parser")
+
+        if "revurugcardiol.org.uy" in url_base:
+            # Buscar el enlace contenedor de la revista más reciente
+            ultimo_link_encontrado = soup.find("a", {"class": "link-numero"})
+            if ultimo_link_encontrado and "href" in ultimo_link_encontrado.attrs:
+                url_entera = requests.compat.urljoin(url_base, ultimo_link_encontrado["href"])
+                print(f"Última URL encontrada: {url_entera}")
+                return url_entera
+            else:
+                print("No se encontró el enlace de la revista más reciente. (REVURUGCARDIOL)")
+                return None
+        elif "spu.org.uy" in url_base:
+            # Encontrar el título "Revistas 2024"
+            revistas_2024_div = soup.find("a", {"title": "Revistas 2024"})
+            if not revistas_2024_div:
+                print("No se encontró el enlace a 'Revistas 2024'.")
+            else:
+                # Buscar todos los enlaces después de "Revistas 2024"
+                parent_div = revistas_2024_div.find_parent("div")
+                siguientes_enlaces = parent_div.find_all_next("a", {"title": True})
+                
+                if siguientes_enlaces:
+                    # Seleccionar el primer enlace válido (el más reciente)
+                    ultimo_enlace_url = siguientes_enlaces[1]["href"]  # Aquí se elige el primero de la lista
+                    url_entera = requests.compat.urljoin(url_base, ultimo_enlace_url)  # Resolver URL completa
+                    print(f"Último número encontrado: {siguientes_enlaces[1]['title']} -> {url_entera}")
+                    return url_entera  # Retorna el enlace completo
+                else:
+                    print("No se encontraron números después de 'Revistas 2024'.")
+        elif "ago.uy" in url_base:
+              # Buscar el enlace al "Último número" en el div con clase 'ctas'
+            ultimo_div = soup.find("div", class_="ctas")
+            if ultimo_div:
+                link = ultimo_div.find("a", href=True)
+                if link:
+                    url_entera = requests.compat.urljoin(url_base, link["href"])
+                    print(f"Último número encontrado (AGO): {url_entera}")
+                    return url_entera
+            print(f"No se encontró el enlace al último número en {url_base}")
+            return None
+        elif "www.boletinfarmacologia.hc.edu.uy" in url_base: 
+            print("ENTRÉ")
+            # Buscar la sección que contiene los enlaces a los boletines
+            seccion_boletines = soup.find("section", id="sp-main-body")
+            if seccion_boletines:
+                # Buscar todos los artículos de boletines (que contienen los años)
+                boletines_links = seccion_boletines.find_all("a", href=True)
+                
+                # Filtrar los enlaces que corresponden a boletines con años, como "/boletines/bolet/2024"
+                boletines_anios = [
+                    requests.compat.urljoin(url_base, link["href"])
+                    for link in boletines_links if "/boletines/bolet/" in link["href"]
+                ]
+                
+                # Obtener el enlace al boletín más reciente (suponiendo que el último enlace es el más reciente)
+                if boletines_anios:
+                    ultimo_enlace_url = boletines_anios[0]  # El más reciente debe ser el primero en la lista
+                    print(f"Último boletín encontrado: {ultimo_enlace_url}")
+                    return ultimo_enlace_url
+                else:
+                    print("No se encontraron boletines disponibles.")
+            else:
+                print("No se encontró la sección de boletines.")
+        elif "casmu.com.uy" in url_base:
+            print("Procesando CasmuCerca...")
+            # Buscar la sección de ediciones anteriores
+            secion_ediciones = soup.find("span", text="Ediciones anteriores Revista CasmuCerca")
+            if secion_ediciones:
+                # Buscar el 'dl' que contiene las ediciones de 2024
+                dl = secion_ediciones.find_next("dl", class_="sc-accordions")
+                if dl:
+                    # Buscar el primer enlace dentro de 2024
+                    seccion_2024 = dl.find("dt", text="2024")
+                    if seccion_2024:
+                        # Obtener los enlaces de las revistas dentro de 2024
+                        links_2024 = seccion_2024.find_next("dd").find_all("a", href=True)
+                        if links_2024:
+                            # Tomar el primer enlace, el más reciente
+                            ultimo_enlace_url = links_2024[0]["href"]
+                            url_entera = requests.compat.urljoin(url_base, ultimo_enlace_url)
+                            print(f"Última revista encontrada: {url_entera}")
+                            return url_entera
+                        else:
+                            print("No se encontraron enlaces dentro de 2024.")
+                    else:
+                        print("No se encontró la sección para el año 2024.")
+                else:
+                    print("No se encontró la sección de 'Ediciones anteriores'.")
+            else:
+                print("No se encontró el texto 'Ediciones anteriores Revista CasmuCerca'.")
+        elif "opcionmedica.com.uy" in url_base:
+            # Lógica para opcionmedica.com.uy
+            try:
+                # Buscar el primer artículo que contiene la clase `elementor-post`
+                article = soup.find("article", class_="elementor-post")
+                if article:
+                    # Extraer el primer enlace dentro del artículo
+                    link = article.find("a", href=True)
+                    if link:
+                        url_entera = requests.compat.urljoin(url_base, link["href"])
+                        print(f"Última revista encontrada (Opción Médica): {url_entera}")
+                        return url_entera
+                    else:
+                        print("No se encontró un enlace en el artículo correspondiente.")
+                else:
+                    print("No se encontró el artículo correspondiente a la última revista.")
+            except Exception as e:
+                print(f"Error al procesar opcionmedica.com.uy: {e}")
+        else:
+            # Selector genérico para otras páginas
+            ultimo_link_encontrado = soup.find("a", {"class": "title"})
+            if ultimo_link_encontrado:
+                url_entera = requests.compat.urljoin(url_base, ultimo_link_encontrado["href"])
+                print(f"Latest issue URL: {url_entera}")
+                return url_entera
+            else:
+                print("No se encontró el enlace de la revista más reciente.")
+                return None
+    except Exception as e:
+        print(f"Error finding the latest magazine: {e}")
+        return None
+
+
+def sacar_articulos_de_revista(issue_url):
+    try:
+        respuesta = requests.get(issue_url)
+        respuesta.raise_for_status()
+        soup = BeautifulSoup(respuesta.text, "html.parser")
+
+        # Encontrar enlaces de los artículos (caso genérico y específico)
+        if "revurugcardiol.org.uy" in issue_url:
+            links_articulos = soup.find_all("a", href=True)
+            articles = [
+                requests.compat.urljoin(issue_url, link["href"])
+                for link in links_articulos if "/index.php/articulo/" in link["href"]
+            ]
+        elif "spu.org.uy" in issue_url:
+            print("Procesando artículos para SPU...")
+            links_articulos = soup.find_all("a", href=True)
+            # Depuración: Mostrar los enlaces encontrados
+            for link in links_articulos:
+                print(f"Enlace encontrado: {link['href']}")
+
+            # Filtrar enlaces que terminen en .pdf
+            articles = [
+                requests.compat.urljoin(issue_url, link["href"])
+                for link in links_articulos if link["href"].lower().endswith(".pdf")
+                
+            ]
+        elif "ago.uy" in issue_url:
+            print("Procesando artículos para AGO...")
+            # Buscar el div con clase 'panel has-blocks'
+            panel_div = soup.find("div", class_="panel has-blocks")
+            if panel_div:
+                # Buscar el enlace dentro del div
+                pdf_link = panel_div.find("a", href=True, class_="panel-block")
+                if pdf_link:
+                    pdf_url = requests.compat.urljoin(issue_url, pdf_link["href"])
+                    print(f"Enlace al PDF completo encontrado: {pdf_url}")
+                    articles = [pdf_url]
+                else:
+                    print("No se encontró el enlace al PDF dentro del 'panel has-blocks'.")
+            else:
+                print("No se encontró el div 'panel has-blocks' para AGO.")
+        elif "farmacologia.hc.edu.uy" in issue_url:
+            print("Procesando artículos para Farmacología...")
+
+            # Buscar todos los <span> que contienen información de volumen
+            span_volumen = soup.find_all('span', string=re.compile(r'Volumen \d+, Número \d+ / \w+ \d{4}'))
+
+            if span_volumen:
+                # Seleccionar el último volumen (más reciente)
+                ultimo_volumen = span_volumen[-1]
+                
+                # Encontrar los párrafos que siguen a este último volumen
+                p_tags = ultimo_volumen.find_parent().find_all_next('p')
+                
+                articles = []
+                for p in p_tags:
+                    a_tags = p.find_all('a', href=True)  # Buscar todos los enlaces dentro de cada párrafo
+                    for a in a_tags:
+                        articles.append(requests.compat.urljoin(issue_url, a['href']))
+            else:
+                print("No se encontró un volumen válido.")
+                articles = []
+        elif "casmu.com.uy" in issue_url:
+
+            # Buscar todos los enlaces y filtrar los que contienen "Ver o descargar"
+            boton_descargar = soup.find("a", href=True, string=lambda text: text and "Ver o descargar" in text)
+
+            if boton_descargar:
+                pdf_url = requests.compat.urljoin(issue_url, boton_descargar["href"])
+                print(f"Enlace al PDF completo encontrado: {pdf_url}")
+                articles = [pdf_url]
+            else:
+                print("No se encontró el enlace al PDF para la revista.")
+                articles = []    
+        elif "opcionmedica.com.uy" in issue_url:
+            print("Procesando artículos para Opción Médica...")
+
+            # Buscar el script que contiene la URL del PDF
+            matchScript = re.search(r'var option_df_\d+ = \{[^}]*"source":\s*"([^"]+\.pdf)"', respuesta.text)
+
+            if matchScript:
+                pdf_url = matchScript.group(1)  # Extraer la URL del PDF
+                
+                # Corregir la URL, reemplazando secuencias escapadas
+                pdf_url = pdf_url.replace("\\/", "/")  # Reemplaza \\/ por /
+                pdf_url = pdf_url.replace("\\", "")  # Elimina las barras invertidas extra
+
+                print(f"Enlace al PDF encontrado: {pdf_url}")
+                articles = [pdf_url]  # Devolver la URL en una lista
+            else:
+                print("No se encontró ninguna URL de PDF en el código fuente.")
+                articles = []
+        else:
+            links_articulos = soup.find_all("a", href=True)           
+            articles = [
+                requests.compat.urljoin(issue_url, link["href"])
+                for link in links_articulos if "/article/view/" in link["href"]
+            ]
+
+        print(f"Se han encontrado: {len(articles)} articulos.")
+        return articles
+    except Exception as e:
+        print(f"No se encontraron articulos: {e}")
+        return []
+
+
+def descargar_y_abrir_pdf(articulo_url, carpeta, is_revurugcardiol=False): 
+    try:
+        # Obtener el contenido de la página del artículo
+        respuesta = requests.get(articulo_url)
+        respuesta.raise_for_status()
+        soup = BeautifulSoup(respuesta.text, "html.parser")
+
+
+        
+        # Si es la revista revurugcardiol.org.uy, buscar dentro del div con clase 'seccion-pdf'
+        if is_revurugcardiol:
+            pdf_div = soup.find("div", class_="seccion-pdf")
+            if pdf_div:
+                pdf_link = pdf_div.find("a", href=True)
+                if pdf_link and "href" in pdf_link.attrs:
+                    pdf_url = requests.compat.urljoin(articulo_url, pdf_link["href"])
+                    print(f"Link PDF Revista Uruguaya de Cardiología: {pdf_url}")
+                    # Abrir el PDF en el navegador
+                    webbrowser.open(pdf_url)
+
+                else:
+                    print(f"No se encontró el link pdf: {articulo_url}")
+            else:
+                print(f"No se encontró eld iv: {articulo_url}")
+        elif articulo_url.lower().endswith(".pdf"):
+            print(f"Link directo: {articulo_url}")
+            # Abrir el PDF directamente en el navegador
+            webbrowser.open(articulo_url)
+
+
+        else:
+            # Buscar el enlace al visor de PDF (con clase específica) para otras revistas
+            pdf_viewer_link = soup.find("a", {"class": "obj_galley_link pdf"})
+            if pdf_viewer_link:
+                pdf_url = requests.compat.urljoin(articulo_url, pdf_viewer_link["href"])
+                print(f"Pdf link encontrado: {pdf_url}")
+                # Abrir el PDF en el navegador
+                #webbrowser.open(pdf_url)
+
+            else:
+                print(f"No se encontró el link: {articulo_url}")
+
+    except Exception as e:
+        print(f"Error procesando el artículo: {articulo_url}: {e}")
+
+def descargar():
+    # Ruta al archivo con los links
+    file_path = os.path.expanduser("backend/txtLinks/link1RevistaAPIs.txt")
+    
+
+    with open(file_path, "r") as file:
+        lines = file.readlines()
+
+    # Crear carpeta de destino para los PDFs
+    crear_carpeta("PDFs")
+
+    total_pdfs = 0
+
+    # Procesar el archivo de texto
+    for line in lines:
+        line = line.strip().split("-->")[0].strip()  # Limpiar URL
+        # Eliminar cualquier prefijo como "3)" antes de la URL
+        line = line.split(" ")[-1]  # Tomar solo la última parte de la línea (que debe ser la URL)
+
+        # Verificar si la línea contiene una URL válida
+        if line.startswith("http"):
+            if "revista.rmu.org.uy" in line:
+                # Obtener artículos desde la última revista
+                print("Procesando Revista RMU...")
+                ultimo_link_revista = ultima_revista(line)
+                if ultimo_link_revista:
+                    links_articulos = sacar_articulos_de_revista(ultimo_link_revista)
+                    for link_articulo in links_articulos:
+                        total_pdfs = total_pdfs + 1
+                        descargar_y_abrir_pdf(link_articulo, "PDFs")
+            elif "revurugcardiol.org.uy" in line:
+                # Procesar Revista Uruguaya de Cardiología
+                print("Procesando Revista Uruguaya de Cardiología...")
+                """ultimo_link_revista = ultima_revista(line)
+                if ultimo_link_revista:
+                    links_articulos = sacar_articulos_de_revista(ultimo_link_revista)
+                    for link_articulo in links_articulos:
+                        descargar_y_abrir_pdf(link_articulo, "PDFs", is_revurugcardiol=True)"""
+            elif "spu.org.uy" in line:
+                print("Procesando SPU...")
+                """ultimo_link_revista = ultima_revista(line)
+                if ultimo_link_revista:
+                    links_articulos = sacar_articulos_de_revista(ultimo_link_revista)
+                    for link_articulo in links_articulos:
+                        descargar_y_abrir_pdf(link_articulo, "PDFs")"""
+            elif "ago.uy" in line:  # Condicional para esta nueva página
+                print("Procesando AGO...")
+                """ultimo_link_revista = ultima_revista(line)
+                if ultimo_link_revista:
+                    links_articulos = sacar_articulos_de_revista(ultimo_link_revista)
+                    for link_articulo in links_articulos:
+                        descargar_y_abrir_pdf(link_articulo, "PDFs")"""
+            elif "www.boletinfarmacologia.hc.edu.uy" in line: #LEVANTA TODOS LOS PDF MENOS 2 porque son una pagina y un png,                                                  
+                print("Procesando Boletin Farmacologia")
+                """ultimo_link_revista = ultima_revista(line)
+                if ultimo_link_revista:
+                    links_articulos = sacar_articulos_de_revista(ultimo_link_revista)
+                    for link_articulo in links_articulos:
+                        descargar_y_abrir_pdf(link_articulo, "PDFs")"""
+            elif "casmu.com.uy" in line:
+                # Halla el pdf que necesitamos ya que dice si o si "Ver o descargar, y luego el numero de revista" (no encontré otra forma)
+                # Está en el if de sacar_articulos_de_revista
+                print("Procesando Revista CasmuCerca...")
+                """ultimo_link_revista = ultima_revista(line)
+                if ultimo_link_revista:
+                    links_articulos = sacar_articulos_de_revista(ultimo_link_revista)
+                    for link_articulo in links_articulos:
+                        descargar_y_abrir_pdf(link_articulo, "PDFs")"""
+            elif "www.opcionmedica.com.uy" in line: 
+                # ESTUVO ULTRA DIFICIL 
+                print("Procesando Opcion Medica")
+                """ultimo_link_revista = ultima_revista(line)
+                if ultimo_link_revista:
+                    links_articulos = sacar_articulos_de_revista(ultimo_link_revista)
+                    for link_articulo in links_articulos:
+                        descargar_y_abrir_pdf(link_articulo, "PDFs")"""
+            else:
+                # Para otras revistas
+                print("Procesando otras revistas...")
+                """links_articulos = sacar_articulos_de_revista(line)
+                for link_articulo in links_articulos:
+                    descargar_y_abrir_pdf(link_articulo, "PDFs")"""
+        else:
+            print(f"URL inválida: {line}")
+        print(total_pdfs)
+    return total_pdfs / 2
+
+
+# Endpoint para triggerear el scraping
+@app.route('/scraping/revistas', methods=['GET'])
+@jwt_required()
+def obtener_revistas():
+    try:
+        # Ejecutar scraping
+        total_pdfs = descargar()
+        print(f"Pdfs: {total_pdfs}")
+        
+        # Listar PDFs descargados
+        pdfs = os.listdir("PDFs") if os.path.exists("PDFs") else []
+        
+        return jsonify({
+            "message": f"Scraping completado. {total_pdfs} PDFs descargados",
+            "revistas": total_pdfs
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "error": "Error en el scraping",
+            "details": str(e)
+        }), 500
+                # TERMINA EL SCRAPING #
 
 # OBTENER BUSQUEDAS REALIZADAS
 

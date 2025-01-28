@@ -159,6 +159,35 @@ document.getElementById("form-PDF").addEventListener("submit", async (event) => 
     }
 });
 
+// Lógica para el botón de scraping
+document.getElementById("btnScraping").addEventListener("click", async () => {
+    try {
+        const response = await fetch(`${API_URL}/scraping/revistas`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("token")}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // Mostrar solo la cantidad de PDFs obtenidos
+            const cantidadPDFs = data.revistas; // La clave "revistas" ahora es un array
+            document.getElementById("cantidadRevistas").textContent = cantidadPDFs;
+        } else {
+            alert("Error al obtener revistas: " + data.error);
+            console.error(data.details);
+        }
+    } catch (error) {
+        console.error("Error al realizar el scraping:", error);
+        alert("Ocurrió un error al realizar el scraping.");
+    }
+});
+
+
+
+
 /* TRADUCIR PDF */
 document.getElementById("form-traducirPDF").addEventListener("submit", async (event) => {
     event.preventDefault(); // Prevenir el envío por defecto del formulario
