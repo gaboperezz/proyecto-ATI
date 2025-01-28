@@ -31,5 +31,6 @@
         ".vscode{,/**}"
     ],
     "appService.defaultWebAppToDeploy": "/subscriptions/b0ea1620-13a0-481f-89ff-e0bf89e1781b/resourceGroups/proyecto_ATI_2024/providers/Microsoft.Web/sites/proyecto-303361-288901",
-    "appService.deploySubpath": "."
+    "appService.deploySubpath": ".",
+    "python.analysis.autoImportCompletions": true
 }
