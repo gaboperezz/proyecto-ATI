@@ -1,0 +1,35 @@
+name: Deploy en Azure Static Web Apps
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Paso 1: Clonar el repositorio
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Paso 2: Configurar Python y las dependencias
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install Python dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+
+      # Paso 3: Copiar los archivos estáticos (JavaScript y HTML)
+      - name: Deploy to Azure Static Web App
+        env:
+          AZURE_STATIC_WEB_APPS_API_TOKEN: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+        run: |
+          npx azure-static-web-apps-cli deploy ./frontend  # Cambia "./" si necesitas especificar el directorio del frontend
+
