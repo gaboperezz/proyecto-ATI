@@ -13,7 +13,6 @@ import fitz
 import io
 import deep_translator
 from io import BytesIO
-import os
 import requests
 from bs4 import BeautifulSoup
 import webbrowser
@@ -215,11 +214,11 @@ def cargar_pdf():
         return jsonify({"error": "Solo se permiten archivos PDF."}), 400
 
     # Generar la ruta completa del archivo
-    file_path = os.path.join(app.config['UPLOAD_carpeta'], file.filename)
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
 
     try:
         # Guardar el archivo en el sistema de archivos
-        os.makedirs(app.config['UPLOAD_carpeta'], exist_ok=True)  # Crear el directorio si no existe
+        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)  # Crear el directorio si no existe
         file.save(file_path)
 
         # Guardar información en la base de datos
