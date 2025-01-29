@@ -16,13 +16,6 @@ from io import BytesIO
 import requests
 from bs4 import BeautifulSoup
 import webbrowser
-import re
-
-
-#
-usuarioLogueado = None
-palabrasClave = {} 
-#
 
 # RUTAS DE INTERES #
 
