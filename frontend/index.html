@@ -10,7 +10,7 @@
     <!-- Botones Logout y Protected ocultos inicialmente -->
     <div id="botonesMenu" style="position: fixed; top: 10px; left: 10px; z-index: 1000; display: none;">
         <button type="button" id="btnLogout">Logout</button>
-        <button type="button" id="btnProtected">PROTECTED</button>
+        <!-- <button type="button" id="btnProtected">PROTECTED</button> -->
     </div>
 
     <header>
@@ -61,7 +61,7 @@
             <div id="divMenuPrincipalTraducirPdf">
                 <h1> Traducir PDF </h1>
                 <div id="listaDocumentos2">
-                    <h2>Selecciona documentos para la búsqueda</h2>
+                    <h2>Seleccione documentos para la búsqueda</h2>
                 </div>
                 <form id="form-traducirPDF" enctype="multipart/form-data">
                     <button type="submit" id="btnTraducirPdf">Traducir PDF</button>
@@ -73,45 +73,50 @@
                 <input type="text" id="txtPalabraClave" placeholder="Ingrese palabra clave">
                 <button type="button" id="btnAgregarPalabraClave">Agregar palabra clave</button><br>
                 <form id="form-txt">
-                    <p>o puedes subir un archivo con palabras clave:</p>
+                    <p>o puede subir un archivo con palabras clave:</p>
                     <label for="txtFile">Seleccione un archivo .txt:</label>
                     <input type="file" id="txtFile" name="txtFile" accept=".txt" required><br>
                     <button type="submit" id="btnCargarPalabras">Cargar palabras clave</button>
                 </form><br>
-                <div id="listaPalabrasClave">
-                    <h2>Listado de palabras clave</h2>
+
+                <h2>Listado de palabras clave</h2>
+                <button type="button" id="btnListadoPalabrasClave">Ver listado completo</button>
+                <button type="button" id="btnOcultarListadoPalabrasClave" style="display: none;">Ocultar listado completo</button>
+                <div id="divListaPalabrasClave">
                 </div>
             </div>
 
                         <!-- Caja para Búsquedas -->
             <div class="box-busquedas">
                 <h1 class="titulo-busquedas">Búsquedas</h1>
-                <button type="button" id="btnVerBusquedas" class="btn-ver-busquedas">Ver búsquedas anteriores</button>
+                <button type="button" id="btnVerBusquedas">Ver búsquedas anteriores</button>
+                <button type="button" id="btnOcultarBusquedas" style="display: none;">Ocultar búsquedas</button>
+                <div id="divListadoBusquedasAnteriores"></div>
 
-                <div id="listaDocumentos" class="lista-documentos">
+                <div id="listaDocumentos">
                     <h2>Selecciona documentos para la búsqueda</h2>
                 </div>
 
-                <form id="form-busqueda" class="form-busqueda">
-                    <label for="nombreBusqueda">Nombre de la Búsqueda:</label>
-                    <input type="text" id="nombreBusqueda" placeholder="Nombre opcional" class="input-busqueda">
-                    <button type="submit" class="btn-realizar-busqueda" id="btnRealizarBusqueda">Realizar Búsqueda</button>
+                <form id="form-busqueda">
+                    <label for="nombreBusqueda">Nombre de la búsqueda:</label>
+                    <input type="text" id="nombreBusqueda" placeholder="Nombre de la búsqueda">
+                    <button type="submit" id="btnRealizarBusqueda">Realizar búsqueda</button>
                 </form>
 
-                <h2 class="titulo-actualizar-comentario">Actualizar Comentario de Búsqueda</h2>
-                <form id="agregarComentario" class="form-comentario">
-                    <label for="searchId">ID de la Búsqueda:</label>
-                    <input type="number" id="searchId" placeholder="ID de la búsqueda" required class="input-comentario">
+                <h2>Actualizar comentario de búsqueda</h2>
+                <form id="agregarComentario">
+                    <label for="searchId">ID de la búsqueda:</label>
+                    <input type="number" id="searchId" placeholder="ID de la búsqueda" required>
 
-                    <label for="newComment">Nuevo Comentario:</label>
-                    <textarea id="newComment" placeholder="Comentario" class="textarea-comentario"></textarea>
+                    <label for="nuevoComentario">Nuevo comentario:</label>
+                    <textarea id="nuevoComentario" placeholder="Agregue un comentario"></textarea>
 
-                    <button type="submit" class="btn-actualizar-comentario">Actualizar Comentario</button>
+                    <button type="submit">Actualizar Comentario</button>
                 </form>
             </div>
                 <!-- Nuevo div para el scraping -->
                 <div id="divScraping">
-                    <h1>Web Scraping de Revistas</h1>
+                    <h1>Web scraping de revistas</h1>
                     <button type="button" id="btnScraping">Obtener Revistas</button>
                     <div id="resultadoScraping">
                         <h2>Total de Revistas:</h2>

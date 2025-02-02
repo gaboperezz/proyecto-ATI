@@ -9,7 +9,7 @@ CORS(app)
 
 pwd = 'RV71ok9%"5Og'
 
-DATABASE_URI = "mssql+pyodbc://db_manager:"+pwd+"@proyecto-303361-288901.database.windows.net/proyecto-303361-288901?driver=ODBC+Driver+17+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no"
+DATABASE_URI = "mssql+pyodbc://gabo:1357@localhost/db_prueba?driver=ODBC+Driver+17+for+SQL+Server"
 
 # "mssql+pyodbc://db_manager:"+pwd+"@proyecto-303361-288901.database.windows.net/proyecto-303361-288901?driver=ODBC+Driver+17+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no"
 

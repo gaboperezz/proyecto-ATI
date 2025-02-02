@@ -1,5 +1,7 @@
+import camelot
 from flask import request, jsonify, send_file
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+import pandas as pd
 from config import app, db
 from models import User, Document, Keyword, SearchResult, Search
 from datetime import datetime, timezone
@@ -192,7 +194,7 @@ def eliminarPalabrasClave(keyword_id):
 def cargar_pdf():
     # Obtener el archivo y el ID del usuario desde la solicitud
     file = request.files.get('document')
-    user_id = get_jwt_identity()  # Asegúrate de que el formulario incluya este campo.
+    user_id = get_jwt_identity()
 
     # Validar que se haya enviado un archivo
     if 'file' not in request.files:
@@ -313,7 +315,7 @@ def traducir_pdf():
                     fitz.Rect(x_start, y_start, x_start + max_width, y_start + max_height),
                     translated_text,
                     fontsize=12,
-                    align=0  # Alinear el texto a la izquierda (opcional)
+                    align=0  # Alinear el texto a la izquierda
                 )
 
                 # Si hay tablas para esta página, insertarlas en la nueva página
@@ -367,8 +369,149 @@ def get_documentos_usuario():
     except Exception as e:
         return jsonify({"error": "Error al obtener documentos del usuario.", "details": str(e)}), 500
     
+# OBTENER BUSQUEDAS REALIZADAS
+@app.route("/getBusquedas", methods=["GET"])
+@jwt_required()
+def get_busquedas():
+    try:
+        usuario_id = get_jwt_identity()
+        busquedas = Search.query.filter_by(user_id=usuario_id).all()
 
-            # EMPIEZA EL SCRAPPING #
+        if(busquedas):
+            # Formatear los resultados en JSON
+            resultado = [
+                {
+                    "id": busqueda.id,
+                    "nombre": busqueda.name,
+                    "comentario": busqueda.comment,
+                    "fechaRealizacion": busqueda.search_date
+                    #.strftime("%Y-%m-%d %H:%M:%S")
+                }
+                for busqueda in busquedas
+            ]
+            return jsonify({"busquedas": resultado}), 200
+        else:
+            return jsonify({"message":"No se encontraron búsquedas para este usuario"}), 404
+
+    except Exception as e:
+        return jsonify({"error": "Error al obtener búsquedas", "details": str(e)}), 500
+
+
+# REALIZAR BUSQUEDA #
+@app.route("/busqueda", methods=["POST"])
+@jwt_required()
+def realizar_busqueda():
+    try:
+        user_id = get_jwt_identity()
+        data = request.json
+
+        ids_documentos = data.get('idsDocumentos')
+        nombre_busqueda = data.get('nombreBusqueda') #, 'Búsqueda sin nombre'
+
+        if not ids_documentos:
+            return jsonify({"error": "Debes proporcionar los IDs de los documentos para la búsqueda."}), 400
+    
+        if not nombre_busqueda:
+            return jsonify({"error": "El nombre de la búsqueda es obligatorio."}), 400
+
+        # Verificar que los documentos pertenecen al usuario
+        documents = Document.query.filter(Document.id.in_(ids_documentos), Document.user_id == user_id).all()
+        if not documents:
+            return jsonify({"error": "No se encontraron documentos válidos para el usuario."}), 404
+
+        # Obtener palabras clave del usuario
+        keywords = Keyword.query.filter_by(user_id=user_id).all()
+        if not keywords:
+            return jsonify({"error": "El usuario no tiene palabras clave registradas."}), 404
+
+        keyword_list = [keyword.keyword for keyword in keywords]
+
+        # Crear una nueva búsqueda en la tabla Search
+        nueva_busqueda = Search(
+            name=nombre_busqueda,
+            user_id=user_id,
+            # created_at=datetime.utcnow() se crea solo creo
+        )
+        db.session.add(nueva_busqueda)
+        db.session.flush()  # Obtener el ID de la búsqueda antes de confirmar
+
+        # Buscar palabras clave
+        for document in documents:
+
+            doc = fitz.open(document.file_path)
+
+            for page in doc:
+                for keyword in keyword_list:
+                    text_instances = page.search_for(keyword)
+
+                    for inst in text_instances:
+                        # Resaltar el texto encontrado
+                        page.add_highlight_annot(inst)
+                        # Crear un nuevo resultado en la tabla SearchResult
+                        search_result = SearchResult(
+                        search_id=nueva_busqueda.id,
+                        document_id=document.id,
+                        keyword=keyword
+                        )
+                        db.session.add(search_result) 
+
+        # Confirmar la transacción
+        db.session.commit()
+
+        # Guardar el PDF resaltado en memoria
+        output_stream = io.BytesIO()
+        doc.save(output_stream, garbage=4, deflate=True)
+        doc.close()
+
+        # Enviar el archivo PDF modificado como respuesta
+        output_stream.seek(0)
+        return send_file(
+            output_stream,
+            as_attachment=True,
+            download_name=f"{document.filename}_highlighted.pdf",
+            mimetype="application/pdf"
+        )
+    
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({"error": "Error al realizar la búsqueda.", "details": str(e)}), 500
+    except Exception as e:
+        return jsonify({"error": "Error al procesar el PDF", "details": str(e)}), 500
+
+
+# AGREGAR COMENTARIO A LA BUSQUEDA #
+@app.route("/busqueda/<int:search_id>/comentario", methods=["PATCH"])
+@jwt_required()
+def agregar_comentario_busqueda(search_id):
+    try:
+        # Obtener ID del usuario autenticado
+        user_id = get_jwt_identity()
+        data = request.json
+        comentario = data.get("comentario")
+
+        # Validación
+        if not comentario:
+            return jsonify({"error": "El comentario no puede estar vacío."}), 400
+
+        # Verificar si la búsqueda pertenece al usuario
+        search = Search.query.filter_by(id=search_id, user_id=user_id).first()
+        if not search:
+            return jsonify({"error": "Búsqueda no encontrada o no pertenece al usuario."}), 404
+
+        # Actualizar el comentario de la búsqueda
+        search.comment = comentario
+        db.session.commit()
+
+        return jsonify({"message": "Comentario agregado con éxito."}), 200
+
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({"error": "Error al agregar el comentario.", "details": str(e)}), 500
+    except Exception as e:
+        return jsonify({"error": "Ocurrió un error inesperado.", "details": str(e)}), 500
+    
+
+# EMPIEZA EL SCRAPPING #
 
 import os
 import requests
@@ -806,124 +949,8 @@ def obtener_revistas():
             "error": "Error en el scraping",
             "details": str(e)
         }), 500
-                # TERMINA EL SCRAPING #
-
-# OBTENER BUSQUEDAS REALIZADAS
-
-
-# REALIZAR BUSQUEDA #
-@app.route("/busqueda", methods=["POST"])
-@jwt_required()
-def realizar_busqueda():
-    try:
-        user_id = get_jwt_identity()
-        data = request.json
-
-        ids_documentos = data.get('idsDocumentos')
-        nombre_busqueda = data.get('nombreBusqueda') #, 'Búsqueda sin nombre'
-
-        if not ids_documentos:
-            return jsonify({"error": "Debes proporcionar los IDs de los documentos para la búsqueda."}), 400
-    
-        if not nombre_busqueda:
-            return jsonify({"error": "El nombre de la búsqueda es obligatorio."}), 400
-
-        # Verificar que los documentos pertenecen al usuario
-        documents = Document.query.filter(Document.id.in_(ids_documentos), Document.user_id == user_id).all()
-        if not documents:
-            return jsonify({"error": "No se encontraron documentos válidos para el usuario."}), 404
-
-        # Obtener palabras clave del usuario
-        keywords = Keyword.query.filter_by(user_id=user_id).all()
-        if not keywords:
-            return jsonify({"error": "El usuario no tiene palabras clave registradas."}), 404
-
-        keyword_list = [keyword.keyword for keyword in keywords]
-
-        # Crear una nueva búsqueda en la tabla Search
-        nueva_busqueda = Search(
-            name=nombre_busqueda,
-            user_id=user_id,
-            # created_at=datetime.utcnow() se crea solo creo
-        )
-        db.session.add(nueva_busqueda)
-        db.session.flush()  # Obtener el ID de la búsqueda antes de confirmar
-
-        # Buscar palabras clave
-        for document in documents:
-
-            doc = fitz.open(document.file_path)
-
-            for page in doc:
-                for keyword in keyword_list:
-                    text_instances = page.search_for(keyword)
-
-                    for inst in text_instances:
-                        # Resaltar el texto encontrado
-                        page.add_highlight_annot(inst)
-                        # Crear un nuevo resultado en la tabla SearchResult
-                        search_result = SearchResult(
-                        search_id=nueva_busqueda.id,
-                        document_id=document.id,
-                        keyword=keyword
-                        )
-                        db.session.add(search_result) 
-
-        # Confirmar la transacción
-        db.session.commit()
-
-        # Guardar el PDF resaltado en memoria
-        output_stream = io.BytesIO()
-        doc.save(output_stream, garbage=4, deflate=True)
-        doc.close()
-
-        # Enviar el archivo PDF modificado como respuesta
-        output_stream.seek(0)
-        return send_file(
-            output_stream,
-            as_attachment=True,
-            download_name=f"{document.filename}_highlighted.pdf",
-            mimetype="application/pdf"
-        )
-    
-    except SQLAlchemyError as e:
-        db.session.rollback()
-        return jsonify({"error": "Error al realizar la búsqueda.", "details": str(e)}), 500
-    except Exception as e:
-        return jsonify({"error": "Error al procesar el PDF", "details": str(e)}), 500
-
-
-# AGREGAR COMENTARIO A LA BUSQUEDA #
-@app.route("/busqueda/<int:search_id>/comentario", methods=["PUT"])
-@jwt_required()
-def agregar_comentario_busqueda(search_id):
-    try:
-        # Obtener ID del usuario autenticado
-        user_id = get_jwt_identity()
-        data = request.json
-        comentario = data.get("comentario")
-
-        # Validación
-        if not comentario:
-            return jsonify({"error": "El comentario no puede estar vacío."}), 400
-
-        # Verificar si la búsqueda pertenece al usuario
-        search = Search.query.filter_by(id=search_id, user_id=user_id).first()
-        if not search:
-            return jsonify({"error": "Búsqueda no encontrada o no pertenece al usuario."}), 404
-
-        # Actualizar el comentario de la búsqueda
-        search.comment = comentario
-        db.session.commit()
-
-        return jsonify({"message": "Comentario agregado con éxito."}), 200
-
-    except SQLAlchemyError as e:
-        db.session.rollback()
-        return jsonify({"error": "Error al agregar el comentario.", "details": str(e)}), 500
-    except Exception as e:
-        return jsonify({"error": "Ocurrió un error inesperado.", "details": str(e)}), 500
-
+                
+# TERMINA EL SCRAPING #
 
 # GET, PATCH Y DELETE DE EJEMPLOS #
 

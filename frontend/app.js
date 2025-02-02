@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:5000"; //PONER URL DE LA API
+const API_URL = "http://127.0.0.1:8000"; //PONER URL DE LA API
 
 
 /* IR A LOGIN O REGISTRO */
@@ -17,8 +17,6 @@ document.getElementById("btnIrALogin").addEventListener("click", () =>{
 document.getElementById("btnRegistro").addEventListener("click", async () => {
     const username = document.getElementById("txtRegistroUsuario").value;
     const password = document.getElementById("txtRegistroPassword").value;
-
-    
 
     const response = await fetch(`${API_URL}/crear_usuario`, {
         method: "POST",
@@ -51,7 +49,7 @@ document.getElementById("btnLogin").addEventListener("click", async () => {
         localStorage.setItem("idLogueado", resultado.idUsuario);
         cargarDocumentos();
         cargarDocumentos2();
-        cargarPalabrasClave();
+        // cargarPalabrasClave();
         document.getElementById("divLogin").style.display = "none";
         document.getElementById("divMenuPrincipal").style.display = "block";
         document.getElementById("txtLoginUsuario").value = "";
@@ -107,19 +105,19 @@ document.getElementById("togglePasswordRegistro").addEventListener("click", () =
     }
 });
 
-/* PROTECTED DE EJEMPLO (pide autorizacion en el header) */
-document.getElementById("btnProtected").addEventListener("click", async () =>{
-    const response = await fetch(`${API_URL}/protected`, {
-        method: "GET",
-        headers: { 
-            "Authorization": `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json"
-        },
-    });
+// /* PROTECTED DE EJEMPLO (pide autorizacion en el header) */
+// document.getElementById("btnProtected").addEventListener("click", async () =>{
+//     const response = await fetch(`${API_URL}/protected`, {
+//         method: "GET",
+//         headers: { 
+//             "Authorization": `Bearer ${localStorage.getItem("token")}`,
+//             "Content-Type": "application/json"
+//         },
+//     });
 
-    const resultado = await response.json();
-    alert(resultado.message || resultado.error);
-})
+//     const resultado = await response.json();
+//     alert(resultado.message || resultado.error);
+// })
 
 
 /* SUBIR ARCHIVO PDF */
@@ -184,8 +182,6 @@ document.getElementById("btnScraping").addEventListener("click", async () => {
         alert("Ocurrió un error al realizar el scraping.");
     }
 });
-
-
 
 
 /* TRADUCIR PDF */
@@ -299,7 +295,12 @@ document.getElementById("form-txt").addEventListener("submit", async (event) => 
 });
 
 // CARGAR LISTA DE PALABRAS CLAVE
+document.getElementById("btnListadoPalabrasClave").addEventListener("click", cargarPalabrasClave)
+
 async function cargarPalabrasClave() {
+    document.getElementById("btnOcultarListadoPalabrasClave").style.display = "block";
+    document.getElementById("divListaPalabrasClave").style.display = "block";
+
     const response = await fetch(`${API_URL}/getPalabrasClave`, {
         method: "GET",
         headers: {
@@ -309,7 +310,7 @@ async function cargarPalabrasClave() {
 
     const data = await response.json();
     if (response.ok) {
-        const listaPalabrasClave = document.getElementById("listaPalabrasClave");
+        const listaPalabrasClave = document.getElementById("divListaPalabrasClave");
         listaPalabrasClave.innerHTML = "";
         i=0;
         data.keywords.forEach(kw => {
@@ -325,11 +326,21 @@ async function cargarPalabrasClave() {
             i++;
         });
     } else {
-        alert("Error al cargar documentos: " + data.error);
-        alert(data.details)
+        if(data.message){
+            alert(data.message);
+        }else{
+            alert("Error al cargar palabras clave: " + data.error);
+            alert(data.details)
+        }
     }
 }
 
+/* OCULTAR LISTADO DE PALABRAS CLAVE */
+
+document.getElementById("btnOcultarListadoPalabrasClave").addEventListener("click", () => {
+    document.getElementById("btnOcultarListadoPalabrasClave").style.display = "none";
+    document.getElementById("divListaPalabrasClave").style.display = "none";
+})
 
 /* ELIMINAR PALABRAS CLAVE */
 
@@ -352,11 +363,50 @@ async function eliminarPalabraClave(idPalabraClave){
 }
 
 /* VER BUSQUEDAS ANTERIORES */
-// btnVerBusquedas
+
+document.getElementById("btnVerBusquedas").addEventListener("click", cargarBusquedas)
+
+async function cargarBusquedas(){
+    document.getElementById("btnOcultarBusquedas").style.display = "block";
+    document.getElementById("divListadoBusquedasAnteriores").style.display = "block";
+
+    const response = await fetch(`${API_URL}/getBusquedas`, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("token")}`
+        }
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+        const listaBusquedas = document.getElementById("divListadoBusquedasAnteriores");
+        listaBusquedas.innerHTML = "";
+        i=0;
+        data.busquedas.forEach(busq => {
+            const li = document.createElement("li");
+            li.textContent = busq.id + " - " + busq.nombre + " - " + busq.fechaRealizacion + " - " + busq.comentario;
+            listaBusquedas.appendChild(li);
+            i++;
+        });
+    } else {
+        if(data.message){
+            alert(data.message);
+        }else{
+            alert("Error al cargar palabras clave: " + data.error);
+            alert(data.details)
+        }
+    }
+}
+
+/* OCULTAR LISTADO DE PALABRAS CLAVE */
+
+document.getElementById("btnOcultarBusquedas").addEventListener("click", () => {
+    document.getElementById("btnOcultarBusquedas").style.display = "none";
+    document.getElementById("divListadoBusquedasAnteriores").style.display = "none";
+})
 
 // CARGAR DOCUMENTOS PARA BUSQUEDA
 // Cargar lista de documentos
-
 
 async function cargarDocumentos() {
     const response = await fetch(`${API_URL}/user/documentos`, {
@@ -423,9 +473,6 @@ async function cargarDocumentos2() {
 }
 
 
-/* REALIZAR BUSQUEDA */
-// btnRealizarBusqueda
-
 // REALIZA BUSQUEDA Y DEVUELVE PDF CON HIGHLIGHT
 document.getElementById("form-busqueda").addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -482,6 +529,35 @@ document.getElementById("form-busqueda").addEventListener("submit", async (event
     URL.revokeObjectURL(pdfUrl);
 })
 
+/* AGREGAR COMENTARIO A LA BÚSQUEDA */
+document.getElementById("agregarComentario").addEventListener("submit", async (event) =>{
+    try {
+        event.preventDefault();
+        
+        const busquedaId = document.getElementById("searchId").value;
+        const comentario = document.getElementById("nuevoComentario").value;
+
+        const response = await fetch(`${API_URL}/busqueda/${busquedaId}/comentario`, {
+            method: "PATCH",
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ comentario: comentario }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert("Comentario agregado con éxito.");
+            cargarBusquedas(); // Actualiza la lista de búsquedas
+        } else {
+            alert("Error al agregar comentario: " + data.error);
+        }
+    } catch (error) {
+        alert("Error al agregar comentario." + data.error);
+    }
+})
 
 /* EJEMPLOS */
 

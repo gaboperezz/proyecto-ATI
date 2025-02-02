@@ -31,6 +31,10 @@ header {
     padding: 20px;
 }
 
+textarea {
+    resize: none;
+}
+
 #divLogin, #divRegistrar {
     background-color: #e0f7fa;
     padding: 20px;
