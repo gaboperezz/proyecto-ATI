@@ -1,5 +1,5 @@
 import camelot
-from flask import request, jsonify, send_file
+from flask import render_template, request, jsonify, send_file
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 import pandas as pd
 from config import app, db
@@ -21,9 +21,9 @@ import webbrowser
 
 # RUTAS DE INTERES #
 
-@app.route("/")
+@app.route('/')
 def index():
-    return "<h1>Bienvenido<h1>"
+    return render_template('index.html')
 
 @app.route("/protected", methods=["GET"])
 @jwt_required()
@@ -997,4 +997,4 @@ if __name__ == "__main__":
         db.create_all()
         jwt = JWTManager(app)
 
-    app.run(host='0.0.0.0', port=8000,debug=True)
+    app.run(host='0.0.0.0', port=80,debug=True)
