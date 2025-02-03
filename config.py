@@ -14,7 +14,7 @@ DATABASE_URI = "mssql+pyodbc://db_manager:"+pwd+"@proyecto-303361-288901.databas
 # "mssql+pyodbc://db_manager:"+pwd+"@proyecto-303361-288901.database.windows.net/proyecto-303361-288901?driver=ODBC+Driver+17+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no"
 
 # "mssql+pyodbc://gabo:1357@GONZA\\SQLEXPRESS/db_prueba?driver=ODBC+Driver+17+for+SQL+Server"
-#"mssql+pyodbc://gabo:1357@localhost/db_prueba?driver=ODBC+Driver+17+for+SQL+Server"
+# "mssql+pyodbc://gabo:1357@localhost/db_prueba?driver=ODBC+Driver+17+for+SQL+Server"
 
 # "mssql+pyodbc://db_manager:"+pwd+"@proyecto-303361-288901.database.windows.net/proyecto-303361-288901?driver=ODBC+Driver+17+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no" PARA AZURE
 # "mssql+pyodbc://gabo:1357@localhost/db_prueba?driver=ODBC+Driver+17+for+SQL+Server" para pruebas locales
