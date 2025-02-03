@@ -507,13 +507,6 @@ def agregar_comentario_busqueda(search_id):
 
 # EMPIEZA EL SCRAPPING #
 
-import os
-import requests
-from bs4 import BeautifulSoup
-import re
-from flask import jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
-
 # Función para crear carpetas
 
 def crear_carpeta(nombre_carpeta):
