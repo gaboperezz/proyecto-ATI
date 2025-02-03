@@ -106,21 +106,6 @@ document.getElementById("togglePasswordRegistro").addEventListener("click", () =
     }
 });
 
-// /* PROTECTED DE EJEMPLO (pide autorizacion en el header) */
-// document.getElementById("btnProtected").addEventListener("click", async () =>{
-//     const response = await fetch(`${API_URL}/protected`, {
-//         method: "GET",
-//         headers: { 
-//             "Authorization": `Bearer ${localStorage.getItem("token")}`,
-//             "Content-Type": "application/json"
-//         },
-//     });
-
-//     const resultado = await response.json();
-//     alert(resultado.message || resultado.error);
-// })
-
-
 /* SUBIR ARCHIVO PDF */
 
 document.getElementById("form-PDF").addEventListener("submit", async (event) => {

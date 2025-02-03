@@ -25,12 +25,6 @@ import webbrowser
 def index():
     return render_template('index.html')
 
-@app.route("/protected", methods=["GET"])
-@jwt_required()
-def protected():
-    current_user = get_jwt_identity()
-    return jsonify({"message": f"Hola, {current_user}. Esta es una ruta protegida!"}), 200
-
 
 # LOGIN #
 @app.route("/login", methods=["POST"])

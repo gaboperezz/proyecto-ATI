@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buscador de palabras clave</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
     <!-- Botones Logout y Protected ocultos inicialmente -->
@@ -26,7 +26,7 @@
             
             <div>
                 <input type="password" id="txtLoginPassword" placeholder="Contraseña" required>
-                <img id="togglePasswordLogin" src="imgs/ojo-cerrado.png" alt="Mostrar contrasena"> 
+                <img id="togglePasswordLogin" src="{{ url_for('static', filename='img/ojo-cerrado.png') }}" alt="Mostrar contrasena"> 
             </div>
 
             <button type="button" id="btnLogin">Login</button>
@@ -40,7 +40,7 @@
             <input type="text" id="txtRegistroUsuario" placeholder="Elige tu usuario" required>
             <div>
                 <input type="password" id="txtRegistroPassword" placeholder="Elige tu contraseña" required>
-                <img id="togglePasswordRegistro" src="imgs/ojo-cerrado.png" alt="Mostrar contrasena"> 
+                <img id="togglePasswordRegistro" src="{{ url_for('static', filename='img/ojo-cerrado.png') }}" alt="Mostrar contrasena"> 
             </div>
             <button type="button" id="btnRegistro">Confirmar registro</button>
             <button type="button" id="btnIrALogin">Volver a login</button>
@@ -125,6 +125,6 @@
                 </div>
     </main>
     
-    <script src="app.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
