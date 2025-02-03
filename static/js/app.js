@@ -1,5 +1,6 @@
-const API_URL = "https://proyecto-perezulivi-b8atf7eqguhph3a4.canadacentral-01.azurewebsites.net"
+const API_URL = ""
 // "http://127.0.0.1:8000"; //PONER URL DE LA API
+// "https://proyecto-perezulivi-b8atf7eqguhph3a4.canadacentral-01.azurewebsites.net"
 
 
 /* IR A LOGIN O REGISTRO */
