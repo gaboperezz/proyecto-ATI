@@ -1,4 +1,5 @@
-import camelot
+from urllib.parse import urlparse
+import camelot # type: ignore
 from flask import render_template, request, jsonify, send_file
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 import pandas as pd
@@ -513,6 +514,17 @@ def crear_carpeta(nombre_carpeta):
     if not os.path.exists(nombre_carpeta):
         os.makedirs(nombre_carpeta)
 
+def guardar_archivo(pdf_bytes):
+    """Guarda el PDF en el sistema de archivos y retorna la ruta"""
+    nombre_archivo = f"{uuid.uuid4()}.pdf"  # Nombre único
+    ruta_completa = os.path.join(app.config["UPLOAD_FOLDER"], nombre_archivo)
+    
+    with open(ruta_completa, "wb") as f:
+        f.write(pdf_bytes)
+
+    return ruta_completa
+import uuid
+
 def descargar_y_abrir_pdf(articulo_url, carpeta, is_revurugcardiol=False):
     try:
         # Obtener el contenido de la página del artículo
@@ -528,11 +540,8 @@ def descargar_y_abrir_pdf(articulo_url, carpeta, is_revurugcardiol=False):
                 if pdf_link and "href" in pdf_link.attrs:
                     pdf_url = requests.compat.urljoin(articulo_url, pdf_link["href"])
                     # Abrir el PDF en el navegador
-                    webbrowser.open(pdf_url)
-                else:
-                    print(f"No se encontró PDF: {articulo_url}")
-            else:
-                print(f"No se encontró la sección: {articulo_url}")
+                    # webbrowser.open(pdf_url)
+
         else:
             # Buscar el enlace al visor de PDF (con clase específica) para otras revistas
             pdf_viewer_link = soup.find("a", {"class": "obj_galley_link pdf"})
@@ -540,9 +549,38 @@ def descargar_y_abrir_pdf(articulo_url, carpeta, is_revurugcardiol=False):
                 pdf_url = requests.compat.urljoin(articulo_url, pdf_viewer_link["href"])
                 print(f"Pdf viewer link: {pdf_url}")
                 # Abrir el PDF en el navegador
-                webbrowser.open(pdf_url)
-            else:
-                print(f"No se encontró el pdf viewer link: {articulo_url}")
+                # webbrowser.open(pdf_url)
+
+
+        print("HOLAAAAAAAAA1")
+        if pdf_url:
+            print(f"HOLAAAAAAAAA2: {pdf_url}")
+            pdf_response = requests.get(pdf_url)
+            pdf_response.raise_for_status()
+            pdf_bytes = pdf_response.content
+
+            # Extraer dominio del PDF
+            url_parseada = urlparse(pdf_url)
+            dominio = url_parseada.netloc.replace("www.", "").replace(".", "_")  # revista_rmu_org_uy por ejemplo
+
+            nombre_archivo = pdf_url.split("/")[-1]
+            nombre_archivo_actualizado = f"{dominio}_{nombre_archivo}"  # Ejemplo: revista_rmu_org_uy_1081_1048.pdf
+
+            # Guardar en la base de datos
+            nuevo_documento = Document(
+                user_id=get_jwt_identity(),
+                filename=nombre_archivo_actualizado,
+                file_path=guardar_archivo(pdf_bytes),  # Guardamos la ruta
+                uploaded_at=datetime.now(timezone.utc)
+            )
+            db.session.add(nuevo_documento)
+            db.session.commit()
+            
+            print(f"PDF guardado en BD: {nuevo_documento.filename}")
+            return True
+        else:
+            print(f"No se encontró un PDF en: {articulo_url}")
+            return False
     except Exception as e:
         print(f"Error al procesare articulo:  {articulo_url}: {e}")
 
@@ -780,52 +818,6 @@ def sacar_articulos_de_revista(issue_url):
         print(f"No se encontraron articulos: {e}")
         return []
 
-
-def descargar_y_abrir_pdf(articulo_url, carpeta, is_revurugcardiol=False): 
-    try:
-        # Obtener el contenido de la página del artículo
-        respuesta = requests.get(articulo_url)
-        respuesta.raise_for_status()
-        soup = BeautifulSoup(respuesta.text, "html.parser")
-
-
-        
-        # Si es la revista revurugcardiol.org.uy, buscar dentro del div con clase 'seccion-pdf'
-        if is_revurugcardiol:
-            pdf_div = soup.find("div", class_="seccion-pdf")
-            if pdf_div:
-                pdf_link = pdf_div.find("a", href=True)
-                if pdf_link and "href" in pdf_link.attrs:
-                    pdf_url = requests.compat.urljoin(articulo_url, pdf_link["href"])
-                    print(f"Link PDF Revista Uruguaya de Cardiología: {pdf_url}")
-                    # Abrir el PDF en el navegador
-                    webbrowser.open(pdf_url)
-
-                else:
-                    print(f"No se encontró el link pdf: {articulo_url}")
-            else:
-                print(f"No se encontró eld iv: {articulo_url}")
-        elif articulo_url.lower().endswith(".pdf"):
-            print(f"Link directo: {articulo_url}")
-            # Abrir el PDF directamente en el navegador
-            webbrowser.open(articulo_url)
-
-
-        else:
-            # Buscar el enlace al visor de PDF (con clase específica) para otras revistas
-            pdf_viewer_link = soup.find("a", {"class": "obj_galley_link pdf"})
-            if pdf_viewer_link:
-                pdf_url = requests.compat.urljoin(articulo_url, pdf_viewer_link["href"])
-                print(f"Pdf link encontrado: {pdf_url}")
-                # Abrir el PDF en el navegador
-                #webbrowser.open(pdf_url)
-
-            else:
-                print(f"No se encontró el link: {articulo_url}")
-
-    except Exception as e:
-        print(f"Error procesando el artículo: {articulo_url}: {e}")
-
 def descargar():
     # Ruta al archivo con los links
     file_path = os.path.expanduser("backend/txtLinks/link1RevistaAPIs.txt")
@@ -936,6 +928,7 @@ def obtener_revistas():
             "error": "Error en el scraping",
             "details": str(e)
         }), 500
+                # TERMINA EL SCRAPING #
                 
 # TERMINA EL SCRAPING #
 
