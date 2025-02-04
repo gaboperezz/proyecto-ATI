@@ -86,10 +86,10 @@ document.getElementById("togglePasswordLogin").addEventListener("click", () => {
     // Alternar el tipo del campo entre 'password' y 'text'
     if (passwordInput.type === "password") {
         passwordInput.type = "text";
-        togglePasswordIcon.src = "imgs/ojo-abierto.png"; // Cambiar a ícono de ojo cerrado
+        togglePasswordIcon.src = "img/ojo-abierto.png"; // Cambiar a ícono de ojo cerrado
     } else {
         passwordInput.type = "password";
-        togglePasswordIcon.src = "imgs/ojo-cerrado.png"; // Cambiar a ícono de ojo abierto
+        togglePasswordIcon.src = "img/ojo-cerrado.png"; // Cambiar a ícono de ojo abierto
     }
 });
 
@@ -100,10 +100,10 @@ document.getElementById("togglePasswordRegistro").addEventListener("click", () =
     // Alternar el tipo del campo entre 'password' y 'text'
     if (passwordInput.type === "password") {
         passwordInput.type = "text";
-        togglePasswordIcon.src = "imgs/ojo-abierto.png"; // Cambiar a ícono de ojo cerrado
+        togglePasswordIcon.src = "img/ojo-abierto.png"; // Cambiar a ícono de ojo cerrado
     } else {
         passwordInput.type = "password";
-        togglePasswordIcon.src = "imgs/ojo-cerrado.png"; // Cambiar a ícono de ojo abierto
+        togglePasswordIcon.src = "img/ojo-cerrado.png"; // Cambiar a ícono de ojo abierto
     }
 });
 
