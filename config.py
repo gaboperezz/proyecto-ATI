@@ -9,15 +9,12 @@ CORS(app)
 
 pwd = 'RV71ok9%"5Og'
 
-DATABASE_URI = "mssql+pyodbc://db_manager:"+pwd+"@proyecto-303361-288901.database.windows.net/proyecto-303361-288901?driver=ODBC+Driver+17+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no"
+DATABASE_URI = "mssql+pyodbc://db_manager:"+pwd+"@proyecto-303361-288901.database.windows.net/proyecto-303361-288901_v2?driver=ODBC+Driver+17+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no"
 
 # "mssql+pyodbc://db_manager:"+pwd+"@proyecto-303361-288901.database.windows.net/proyecto-303361-288901?driver=ODBC+Driver+17+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no"
 
-# "mssql+pyodbc://gabo:1357@GONZA\\SQLEXPRESS/db_prueba?driver=ODBC+Driver+17+for+SQL+Server"
-# "mssql+pyodbc://gabo:1357@localhost/db_prueba?driver=ODBC+Driver+17+for+SQL+Server"
-
-# "mssql+pyodbc://db_manager:"+pwd+"@proyecto-303361-288901.database.windows.net/proyecto-303361-288901?driver=ODBC+Driver+17+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no" PARA AZURE
-# "mssql+pyodbc://gabo:1357@localhost/db_prueba?driver=ODBC+Driver+17+for+SQL+Server" para pruebas locales
+# "mssql+pyodbc://gabo:1357@GONZA\\SQLEXPRESS/db_prueba?driver=ODBC+Driver+17+for+SQL+Server" local gonza
+# "mssql+pyodbc://gabo:1357@localhost/db_prueba?driver=ODBC+Driver+17+for+SQL+Server" local gabo
 
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
 
