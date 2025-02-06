@@ -5,7 +5,7 @@ from flask_bcrypt import Bcrypt
 import os
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
-# CORS(app, origins=["https://proyecto-perezulivi-b8atf7eqguhph3a4.canadacentral-01.azurewebsites.net"])
+CORS(app, origins=["https://proyecto-perezulivi-b8atf7eqguhph3a4.azurewebsites.net"])
 
 pwd = 'RV71ok9%"5Og'
 
