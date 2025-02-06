@@ -25,7 +25,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
 # contrasena = 'RV71ok9%"5Og'
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config['JWT_SECRET_KEY'] = 'sjF4V!0mElf#6n5$#dn*a!'
+app.config['JWT_SECRET_KEY'] = os.getenv("JWT_SECRET_KEY", "valor_por_defecto")
 app.config["UPLOAD_FOLDER"] = os.path.join(os.getcwd(), 'uploads')
 
 

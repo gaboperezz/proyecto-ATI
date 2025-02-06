@@ -969,6 +969,10 @@ def borrar_usuario(user_id):
 
     return jsonify({"message": "Usuario borrado"}), 200
 
+
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 # PARA QUE FUNCIONE LA APLICACION #
 
 if __name__ == "__main__":
