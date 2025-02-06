@@ -20,7 +20,7 @@ document.getElementById("btnRegistro").addEventListener("click", async () => {
     const username = document.getElementById("txtRegistroUsuario").value;
     const password = document.getElementById("txtRegistroPassword").value;
 
-    const response = await fetch(`${API_URL}crear_usuario`, {
+    const response = await fetch(`${API_URL}/crear_usuario`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -38,7 +38,7 @@ document.getElementById("btnLogin").addEventListener("click", async () => {
     const username = document.getElementById("txtLoginUsuario").value;
     const password = document.getElementById("txtLoginPassword").value;
 
-    const response = await fetch(`${API_URL}login`, {
+    const response = await fetch(`${API_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -122,7 +122,7 @@ document.getElementById("form-PDF").addEventListener("submit", async (event) => 
     formData.append("file", archivo);
 
     try {
-        const response = await fetch(`${API_URL}upload/pdf`, {
+        const response = await fetch(`${API_URL}/upload/pdf`, {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${localStorage.getItem("token")}`
@@ -147,7 +147,7 @@ document.getElementById("form-PDF").addEventListener("submit", async (event) => 
 // Lógica para el botón de scraping
 document.getElementById("btnScraping").addEventListener("click", async () => {
     try {
-        const response = await fetch(`${API_URL}scraping/revistas`, {
+        const response = await fetch(`${API_URL}/scraping/revistas`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${localStorage.getItem("token")}`
@@ -188,7 +188,7 @@ document.getElementById("form-traducirPDF").addEventListener("submit", async (ev
 
     try {
         // Enviar solicitud al backend
-        const response = await fetch(`${API_URL}translate/pdf`, {
+        const response = await fetch(`${API_URL}/translate/pdf`, {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${localStorage.getItem("token")}`,
@@ -229,7 +229,7 @@ document.getElementById("form-traducirPDF").addEventListener("submit", async (ev
 document.getElementById("btnAgregarPalabraClave").addEventListener("click", async () => {
     const word = document.getElementById("txtPalabraClave").value;
 
-    const response = await fetch(`${API_URL}crearPalabraClave`, {
+    const response = await fetch(`${API_URL}/crearPalabraClave`, {
         method: "POST",
         headers: {
             "Authorization": `Bearer ${localStorage.getItem("token")}`,
@@ -260,7 +260,7 @@ document.getElementById("form-txt").addEventListener("submit", async (event) => 
     formData.append("file", archivo);
 
     try {
-        const response = await fetch(`${API_URL}upload/txt`, {
+        const response = await fetch(`${API_URL}/upload/txt`, {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${localStorage.getItem("token")}`
@@ -288,7 +288,7 @@ async function cargarPalabrasClave() {
     document.getElementById("btnOcultarListadoPalabrasClave").style.display = "block";
     document.getElementById("divListaPalabrasClave").style.display = "block";
 
-    const response = await fetch(`${API_URL}getPalabrasClave`, {
+    const response = await fetch(`${API_URL}/getPalabrasClave`, {
         method: "GET",
         headers: {
             "Authorization": `Bearer ${localStorage.getItem("token")}`
@@ -332,7 +332,7 @@ document.getElementById("btnOcultarListadoPalabrasClave").addEventListener("clic
 /* ELIMINAR PALABRAS CLAVE */
 
 async function eliminarPalabraClave(idPalabraClave){
-    const response = await fetch(`${API_URL}eliminarPalabraClave/${idPalabraClave}`, {
+    const response = await fetch(`${API_URL}/eliminarPalabraClave/${idPalabraClave}`, {
         method: "DELETE",
         headers: {
             "Authorization": `Bearer ${localStorage.getItem("token")}`,
@@ -357,7 +357,7 @@ async function cargarBusquedas(){
     document.getElementById("btnOcultarBusquedas").style.display = "block";
     document.getElementById("divListadoBusquedasAnteriores").style.display = "block";
 
-    const response = await fetch(`${API_URL}getBusquedas`, {
+    const response = await fetch(`${API_URL}/getBusquedas`, {
         method: "GET",
         headers: {
             "Authorization": `Bearer ${localStorage.getItem("token")}`
@@ -396,7 +396,7 @@ document.getElementById("btnOcultarBusquedas").addEventListener("click", () => {
 // Cargar lista de documentos
 
 async function cargarDocumentos() {
-    const response = await fetch(`${API_URL}user/documentos`, {
+    const response = await fetch(`${API_URL}/user/documentos`, {
         method: "GET",
         headers: {
             "Authorization": `Bearer ${localStorage.getItem("token")}`
@@ -428,7 +428,7 @@ async function cargarDocumentos() {
 }
 
 async function cargarDocumentos2() {
-    const response = await fetch(`${API_URL}user/documentos`, {
+    const response = await fetch(`${API_URL}/user/documentos`, {
         method: "GET",
         headers: {
             "Authorization": `Bearer ${localStorage.getItem("token")}`
@@ -475,7 +475,7 @@ document.getElementById("form-busqueda").addEventListener("submit", async (event
     const nombreBusqueda = document.getElementById("nombreBusqueda").value;
 
     try {
-        const response = await fetch(`${API_URL}busqueda`, {
+        const response = await fetch(`${API_URL}/busqueda`, {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${localStorage.getItem("token")}`,
@@ -524,7 +524,7 @@ document.getElementById("agregarComentario").addEventListener("submit", async (e
         const busquedaId = document.getElementById("searchId").value;
         const comentario = document.getElementById("nuevoComentario").value;
 
-        const response = await fetch(`${API_URL}busqueda/${busquedaId}/comentario`, {
+        const response = await fetch(`${API_URL}/busqueda/${busquedaId}/comentario`, {
             method: "PATCH",
             headers: {
                 "Authorization": `Bearer ${localStorage.getItem("token")}`,
@@ -549,7 +549,7 @@ document.getElementById("agregarComentario").addEventListener("submit", async (e
 /* EJEMPLOS */
 
 async function fetchTasks() {
-    const response = await fetch(`${API_URL}tasks`, {
+    const response = await fetch(`${API_URL}/tasks`, {
         headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -568,7 +568,7 @@ async function fetchTasks() {
 }
 
 async function deleteTask(taskId) {
-    await fetch(`${API_URL}tasks/${taskId}`, {
+    await fetch(`${API_URL}/tasks/${taskId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
     });
