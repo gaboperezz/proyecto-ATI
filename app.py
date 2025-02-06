@@ -19,6 +19,7 @@ from io import BytesIO
 import requests
 from bs4 import BeautifulSoup
 import webbrowser
+import logging
 
 # RUTAS DE INTERES #
 
@@ -987,8 +988,6 @@ def handle_exception(e):
 # PARA QUE FUNCIONE LA APLICACION #
 
 if __name__ == "__main__":
-    import logging
-    logging.basicConfig(level=logging.DEBUG)
     with app.app_context():
         db.create_all()
         jwt = JWTManager(app)
