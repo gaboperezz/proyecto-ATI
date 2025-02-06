@@ -22,7 +22,9 @@ document.getElementById("btnRegistro").addEventListener("click", async () => {
 
     const response = await fetch(`${API_URL}/crear_usuario`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+            'Access-Control-Allow-Origin': 'https://proyecto-perezulivi-b8atf7eqguhph3a4.canadacentral-01.azurewebsites.net'
+         },
         body: JSON.stringify({ username, password }),
     });
 
