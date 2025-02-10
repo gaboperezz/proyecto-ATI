@@ -543,7 +543,6 @@ def descargar_y_abrir_pdf(articulo_url, carpeta, is_revurugcardiol=False):
                     # Abrir el PDF en el navegador
                     # webbrowser.open(pdf_url)
         elif articulo_url.lower().endswith(".pdf"):
-            print("QUE FALTA")
             pdf_url = articulo_url
         else:
             # Buscar el enlace al visor de PDF (con clase específica) para otras revistas
