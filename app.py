@@ -506,7 +506,7 @@ def agregar_comentario_busqueda(search_id):
         return jsonify({"error": "Ocurrió un error inesperado.", "details": str(e)}), 500
     
 
-   # EMPIEZA EL SCRAPPING #
+  # EMPIEZA EL SCRAPPING #
 
 # Función para crear carpetas
 
@@ -541,7 +541,9 @@ def descargar_y_abrir_pdf(articulo_url, carpeta, is_revurugcardiol=False):
                     pdf_url = requests.compat.urljoin(articulo_url, pdf_link["href"])
                     # Abrir el PDF en el navegador
                     # webbrowser.open(pdf_url)
-
+        elif articulo_url.lower().endswith(".pdf"):
+            print("QUE FALTA")
+            pdf_url = articulo_url
         else:
             # Buscar el enlace al visor de PDF (con clase específica) para otras revistas
             pdf_viewer_link = soup.find("a", {"class": "obj_galley_link pdf"})
@@ -551,10 +553,8 @@ def descargar_y_abrir_pdf(articulo_url, carpeta, is_revurugcardiol=False):
                 # Abrir el PDF en el navegador
                 # webbrowser.open(pdf_url)
 
-
-        print("HOLAAAAAAAAA1")
         if pdf_url:
-            print(f"HOLAAAAAAAAA2: {pdf_url}")
+            print(f"PDF url:  {pdf_url}")
             pdf_response = requests.get(pdf_url)
             pdf_response.raise_for_status()
             pdf_bytes = pdf_response.content
@@ -839,71 +839,78 @@ def descargar():
 
         # Verificar si la línea contiene una URL válida
         if line.startswith("http"):
-            if "revista.rmu.org.uy" in line:
+            if "revista.rmu.org.uy" in line: # 11
                 # Obtener artículos desde la última revista
                 print("Procesando Revista RMU...")
                 ultimo_link_revista = ultima_revista(line)
                 if ultimo_link_revista:
                     links_articulos = sacar_articulos_de_revista(ultimo_link_revista)
                     for link_articulo in links_articulos:
-                        total_pdfs = total_pdfs + 1
+                        total_pdfs = total_pdfs + (1 / 2)
                         descargar_y_abrir_pdf(link_articulo, "PDFs")
-            elif "revurugcardiol.org.uy" in line:
+            elif "revurugcardiol.org.uy" in line: # DA 1 (ESTA BIEN)
                 # Procesar Revista Uruguaya de Cardiología
                 print("Procesando Revista Uruguaya de Cardiología...")
-                """ultimo_link_revista = ultima_revista(line)
+                ultimo_link_revista = ultima_revista(line)
                 if ultimo_link_revista:
                     links_articulos = sacar_articulos_de_revista(ultimo_link_revista)
                     for link_articulo in links_articulos:
-                        descargar_y_abrir_pdf(link_articulo, "PDFs", is_revurugcardiol=True)"""
+                        total_pdfs = total_pdfs + 1
+                        descargar_y_abrir_pdf(link_articulo, "PDFs", is_revurugcardiol=True)
             elif "spu.org.uy" in line:
-                print("Procesando SPU...")
-                """ultimo_link_revista = ultima_revista(line)
+                print("Procesando SPU...") # DA 11 (ESTA BIEN)
+                ultimo_link_revista = ultima_revista(line)
                 if ultimo_link_revista:
                     links_articulos = sacar_articulos_de_revista(ultimo_link_revista)
                     for link_articulo in links_articulos:
-                        descargar_y_abrir_pdf(link_articulo, "PDFs")"""
-            elif "ago.uy" in line:  # Condicional para esta nueva página
+                        total_pdfs = total_pdfs + 1
+                        descargar_y_abrir_pdf(link_articulo, "PDFs")
+            elif "ago.uy" in line:  # Condicional para esta nueva página # DA 1 (ESTA BIEN)
                 print("Procesando AGO...")
-                """ultimo_link_revista = ultima_revista(line)
+                ultimo_link_revista = ultima_revista(line)
                 if ultimo_link_revista:
                     links_articulos = sacar_articulos_de_revista(ultimo_link_revista)
                     for link_articulo in links_articulos:
-                        descargar_y_abrir_pdf(link_articulo, "PDFs")"""
-            elif "www.boletinfarmacologia.hc.edu.uy" in line: #LEVANTA TODOS LOS PDF MENOS 2 porque son una pagina y un png,                                                  
+                        total_pdfs = total_pdfs + 1
+                        descargar_y_abrir_pdf(link_articulo, "PDFs")
+            elif "www.boletinfarmacologia.hc.edu.uy" in line: #LEVANTA TODOS LOS PDF MENOS 2 porque son una pagina y un png,     8 (ESTA BIEN)
                 print("Procesando Boletin Farmacologia")
-                """ultimo_link_revista = ultima_revista(line)
+                ultimo_link_revista = ultima_revista(line)
                 if ultimo_link_revista:
                     links_articulos = sacar_articulos_de_revista(ultimo_link_revista)
                     for link_articulo in links_articulos:
-                        descargar_y_abrir_pdf(link_articulo, "PDFs")"""
+                        total_pdfs = total_pdfs + (1 / 2)
+                        descargar_y_abrir_pdf(link_articulo, "PDFs")
             elif "casmu.com.uy" in line:
                 # Halla el pdf que necesitamos ya que dice si o si "Ver o descargar, y luego el numero de revista" (no encontré otra forma)
                 # Está en el if de sacar_articulos_de_revista
-                print("Procesando Revista CasmuCerca...")
-                """ultimo_link_revista = ultima_revista(line)
+                print("Procesando Revista CasmuCerca...") # 1 ESTA BIEN
+                ultimo_link_revista = ultima_revista(line)
                 if ultimo_link_revista:
                     links_articulos = sacar_articulos_de_revista(ultimo_link_revista)
                     for link_articulo in links_articulos:
-                        descargar_y_abrir_pdf(link_articulo, "PDFs")"""
-            elif "www.opcionmedica.com.uy" in line: 
+                        total_pdfs = total_pdfs + 1
+                        descargar_y_abrir_pdf(link_articulo, "PDFs")
+            elif "www.opcionmedica.com.uy" in line:  # 1 ESTA BIEN
                 # ESTUVO ULTRA DIFICIL 
                 print("Procesando Opcion Medica")
-                """ultimo_link_revista = ultima_revista(line)
+                ultimo_link_revista = ultima_revista(line)
                 if ultimo_link_revista:
                     links_articulos = sacar_articulos_de_revista(ultimo_link_revista)
                     for link_articulo in links_articulos:
-                        descargar_y_abrir_pdf(link_articulo, "PDFs")"""
+                        total_pdfs = total_pdfs + 1
+                        descargar_y_abrir_pdf(link_articulo, "PDFs")
             else:
                 # Para otras revistas
-                print("Procesando otras revistas...")
-                """links_articulos = sacar_articulos_de_revista(line)
+                print("Procesando otras revistas...") #23 (ESTA BIEN)
+                links_articulos = sacar_articulos_de_revista(line)
                 for link_articulo in links_articulos:
-                    descargar_y_abrir_pdf(link_articulo, "PDFs")"""
+                    total_pdfs = total_pdfs + 1
+                    descargar_y_abrir_pdf(link_articulo, "PDFs")
         else:
             print(f"URL inválida: {line}")
         print(total_pdfs)
-    return total_pdfs / 2
+    return total_pdfs 
 
 
 # Endpoint para triggerear el scraping
@@ -929,8 +936,7 @@ def obtener_revistas():
             "details": str(e)
         }), 500
                 # TERMINA EL SCRAPING #
-                
-# TERMINA EL SCRAPING #
+
 
 # GET, PATCH Y DELETE DE EJEMPLOS #
 
