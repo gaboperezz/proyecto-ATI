@@ -19,6 +19,7 @@ from io import BytesIO
 import requests
 from bs4 import BeautifulSoup
 import webbrowser
+import logging
 
 # RUTAS DE INTERES #
 
@@ -975,6 +976,20 @@ def borrar_usuario(user_id):
 
     return jsonify({"message": "Usuario borrado"}), 200
 
+
+# Crear directorio de logs si no existe
+log_dir = "/home/LogFiles"
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
+
+# Configurar logs de Flask
+log_file = os.path.join(log_dir, "flask_app.log")
+logging.basicConfig(filename=log_file, level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    app.logger.error(f"Error: {str(e)}")
+    return jsonify({"error": "Internal Server Error"}), 500
 
 # PARA QUE FUNCIONE LA APLICACION #
 

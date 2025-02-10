@@ -5,19 +5,17 @@ from flask_bcrypt import Bcrypt
 import os
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
-CORS(app)
+CORS(app, origins=["https://proyecto-perezulivi-b8atf7eqguhph3a4.azurewebsites.net"])
 
 pwd = 'RV71ok9%"5Og'
 
-DATABASE_URI = "mssql+pyodbc://db_manager:"+pwd+"@proyecto-303361-288901.database.windows.net/proyecto-303361-288901?driver=ODBC+Driver+17+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no"
+DATABASE_URI = "mssql+pyodbc://gabo:1357@localhost/db_prueba?driver=ODBC+Driver+17+for+SQL+Server"
 
 # "mssql+pyodbc://db_manager:"+pwd+"@proyecto-303361-288901.database.windows.net/proyecto-303361-288901?driver=ODBC+Driver+17+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no"
+# "mssql+pyodbc://db_manager:"+pwd+"@proyecto-303361-288901.database.windows.net/proyecto-303361-288901_v2?driver=ODBC+Driver+17+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no"
 
-# "mssql+pyodbc://gabo:1357@GONZA\\SQLEXPRESS/db_prueba?driver=ODBC+Driver+17+for+SQL+Server"
-# "mssql+pyodbc://gabo:1357@localhost/db_prueba?driver=ODBC+Driver+17+for+SQL+Server"
-
-# "mssql+pyodbc://db_manager:"+pwd+"@proyecto-303361-288901.database.windows.net/proyecto-303361-288901?driver=ODBC+Driver+17+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no" PARA AZURE
-# "mssql+pyodbc://gabo:1357@localhost/db_prueba?driver=ODBC+Driver+17+for+SQL+Server" para pruebas locales
+# "mssql+pyodbc://gabo:1357@GONZA\\SQLEXPRESS/db_prueba?driver=ODBC+Driver+17+for+SQL+Server" local gonza
+# "mssql+pyodbc://gabo:1357@localhost/db_prueba?driver=ODBC+Driver+17+for+SQL+Server" local gabo
 
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
 
@@ -28,7 +26,8 @@ app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
 # contrasena = 'RV71ok9%"5Og'
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config['JWT_SECRET_KEY'] = 'sjF4V!0mElf#6n5$#dn*a!'
+app.config["JWT_SECRET_KEY"] = "de8!lkvr&6klaw54pO" # Revisar cuál está en Azure
+app.config['JWT_SECRET_KEY'] = os.getenv("JWT_SECRET_KEY", "valor_por_defecto")
 app.config["UPLOAD_FOLDER"] = os.path.join(os.getcwd(), 'uploads')
 
 

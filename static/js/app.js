@@ -1,4 +1,4 @@
-const API_URL = ""
+const API_URL = "http://127.0.0.1:8000";
 // "http://127.0.0.1:8000"; //PONER URL DE LA API
 // "https://proyecto-perezulivi-b8atf7eqguhph3a4.canadacentral-01.azurewebsites.net"
 
@@ -22,7 +22,9 @@ document.getElementById("btnRegistro").addEventListener("click", async () => {
 
     const response = await fetch(`${API_URL}/crear_usuario`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+            // 'Access-Control-Allow-Origin': 'https://proyecto-perezulivi-b8atf7eqguhph3a4.canadacentral-01.azurewebsites.net'
+         },
         body: JSON.stringify({ username, password }),
     });
 
@@ -86,10 +88,10 @@ document.getElementById("togglePasswordLogin").addEventListener("click", () => {
     // Alternar el tipo del campo entre 'password' y 'text'
     if (passwordInput.type === "password") {
         passwordInput.type = "text";
-        togglePasswordIcon.src = "imgs/ojo-abierto.png"; // Cambiar a ícono de ojo cerrado
+        togglePasswordIcon.src = "static/img/ojo-abierto.png"; // Cambiar a ícono de ojo cerrado
     } else {
         passwordInput.type = "password";
-        togglePasswordIcon.src = "imgs/ojo-cerrado.png"; // Cambiar a ícono de ojo abierto
+        togglePasswordIcon.src = "static/img/ojo-cerrado.png"; // Cambiar a ícono de ojo abierto
     }
 });
 
@@ -100,10 +102,10 @@ document.getElementById("togglePasswordRegistro").addEventListener("click", () =
     // Alternar el tipo del campo entre 'password' y 'text'
     if (passwordInput.type === "password") {
         passwordInput.type = "text";
-        togglePasswordIcon.src = "imgs/ojo-abierto.png"; // Cambiar a ícono de ojo cerrado
+        togglePasswordIcon.src = "static/img/ojo-abierto.png"; // Cambiar a ícono de ojo cerrado
     } else {
         passwordInput.type = "password";
-        togglePasswordIcon.src = "imgs/ojo-cerrado.png"; // Cambiar a ícono de ojo abierto
+        togglePasswordIcon.src = "static/img/ojo-cerrado.png"; // Cambiar a ícono de ojo abierto
     }
 });
 
@@ -178,8 +180,6 @@ document.getElementById("form-traducirPDF").addEventListener("submit", async (ev
     // Obtener los documentos seleccionados
     const documentosSeleccionados = Array.from(document.querySelectorAll("#listaDocumentos2 input:checked"))
     .map(checkbox => checkbox.value);
-
-   // print(documentosSeleccionados)
 
     if (documentosSeleccionados.length === 0) {
         alert("Por favor, selecciona al menos un archivo PDF para traducir.");
@@ -545,32 +545,3 @@ document.getElementById("agregarComentario").addEventListener("submit", async (e
         alert("Error al agregar comentario." + data.error);
     }
 })
-
-/* EJEMPLOS */
-
-async function fetchTasks() {
-    const response = await fetch(`${API_URL}/tasks`, {
-        headers: { Authorization: `Bearer ${token}` },
-    });
-
-    const tasks = await response.json();
-    const taskList = document.getElementById("task-list");
-    taskList.innerHTML = "";
-    tasks.forEach((task) => {
-        const li = document.createElement("li");
-        li.textContent = task.content;
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "Eliminar";
-        deleteBtn.addEventListener("click", () => deleteTask(task.id));
-        li.appendChild(deleteBtn);
-        taskList.appendChild(li);
-    });
-}
-
-async function deleteTask(taskId) {
-    await fetch(`${API_URL}/tasks/${taskId}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-    });
-    fetchTasks();
-}
